@@ -1,0 +1,166 @@
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+        .container {
+            flex: 1;
+        }
+        footer {
+            flex-shrink: 0;
+        }
+        .custom-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            background: white;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            transition: background-color 0.3s;
+            padding: 0.75rem 1.5rem;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-primary .spinner-border {
+            margin-right: 0.5rem;
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .navbar {
+            background: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #007bff;
+        }
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            width: 90%;
+            max-width: 500px;
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .dashboard-header {
+            background: linear-gradient(135deg, #007bff, #00c4ff);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .dashboard-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .dashboard-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .dashboard-header .user-id {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        .attendance-card {
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+            min-height: 120px;
+            background: white;
+        }
+        .attendance-card:hover:not(.processing):not(.disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .attendance-card i {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: #007bff;
+        }
+        .attendance-card h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .attendance-card p {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        .attendance-card.processing {
+            background: #e9ecef;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .attendance-card.processing .card-content {
+            display: none;
+        }
+        .attendance-card .processing-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1rem;
+            font-weight: 600;
+            color: #495057;
+            display: none;
+        }
+        .attendance-card.processing .processing-text {
+            display: block;
+        }
+        .attendance-card.check-in {
+            background: #d4edda;
+        }
+        .attendance-card.check-out {
+            background: #cce5ff;
+        }
+        .attendance-card.absent {
+            background: #f8d7da;
+        }
+        .attendance-card.disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .logout-btn {
+            background: #dc3545;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        footer {
+            background: #212529;
+            color: #ffffff;
+        }
+        .password-valid {
+            color: #28a745;
+        }
+        .password-invalid {
+            color: #dc3545;
+        }
+        .form-floating label i {
+            opacity: 0.7;
+        }

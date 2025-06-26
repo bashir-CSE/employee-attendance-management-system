@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attendance Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">  //use css here
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#" aria-label="Aloha Bangladesh Employee Attendance System">
+                <img src="https://www.alohabdonline.com/wp-content/uploads/2020/04/ALOHA-Logo-800-px-X-180-px.png" 
+                     class="img-fluid me-2" style="max-height: 40px;" alt="Aloha Bangladesh Logo">
+                Employee Attendance System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="https://drive.google.com/file/d/1Dc3hpWpTE2bB35-f2UEFEQEy7KUWDK-E/view?usp=drive_link" 
+                           class="nav-link btn btn-primary btn-sm text-white mx-1" download="Leave_Form.pdf" 
+                           aria-label="Download Leave Form">
+                            <i class="fas fa-file-pdf me-1"></i> Leave Form
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://drive.google.com/file/d/1wZP-_X_783B4uyXjtKVHkPkpQDdKmWVU/view?usp=drive_link" 
+                           class="nav-link btn btn-sm btn-primary text-white mx-1" download="Replace_Form.pdf" 
+                           aria-label="Download Replace Form">
+                            <i class="fas fa-file-pdf me-1"></i> Replace Form
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="alertContainer" class="alert-container" role="region" aria-live="polite"></div>
+    <div class="container py-4">
+        <section id="loginPage" class="page active" aria-label="Login Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 400px;">
+                <h2 class="text-center mb-3">Login</h2>
+                <form onsubmit="handleLogin(event)" novalidate>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="loginMgtId" required aria-label="Select your MGT-ID">
+                            <option value="" disabled selected>Select MGT-ID</option>
+                            <option value="MGT-U-481">MGT-U-481</option>
+                            <option value="MGT-U-482">MGT-U-482</option>
+                        </select>
+                        <label for="loginMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                    </div>
+                    <div class="form-floating position-relative mb-3">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Password" 
+                               pattern="\d{8}" required aria-describedby="passwordValidation">
+                        <label for="loginPassword"><i class="bi bi-lock-fill me-2"></i>Password (8 digits)</label>
+                        <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3" 
+                                onclick="togglePassword('loginPassword', 'loginEyeIcon')" 
+                                aria-label="Toggle password visibility" 
+                                aria-controls="loginPassword">
+                            <i id="loginEyeIcon" class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div id="passwordValidation" class="small text-muted mb-3">
+                        Password must be 8 digits (numbers only)
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Login to your account">
+                        <span class="btn-content"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <p class="mt-2 text-center small">
+                    <a href="#" onclick="showPage('forgotPasswordPage')" aria-label="Forgot your password?">Forgot Password?</a> |
+                    New user? <a href="#" onclick="showPage('registrationPage')" aria-label="Register a new account">Register</a>
+                </p>
+            </div>
+        </section>
+        <section id="registrationPage" class="page" aria-label="Registration Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 400px;">
+                <h2 class="text-center mb-3">Register</h2>
+                <form onsubmit="handleRegistration(event)" novalidate>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="mgtId" required aria-label="Select your MGT-ID">
+                            <option value="" disabled selected>Select MGT-ID</option>
+                            <option value="MGT-U-481">MGT-U-481</option>
+                            <option value="MGT-U-482">MGT-U-482</option>
+                        </select>
+                        <label for="mgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="name" placeholder="Name" required 
+                               aria-label="Enter your name">
+                        <label for="name"><i class="bi bi-person-lines-fill me-2"></i>Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" placeholder="Email" required 
+                               aria-label="Enter your email">
+                        <label for="email"><i class="bi bi-envelope-fill me-2"></i>Email</label>
+                    </div>
+                    <div class="form-floating position-relative mb-3">
+                        <input type="password" class="form-control" id="password" placeholder="Password" 
+                               pattern="\d{8}" required aria-describedby="regPasswordValidation">
+                        <label for="password"><i class="bi bi-lock-fill me-2"></i>Password (8 digits)</label>
+                        <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3" 
+                                onclick="togglePassword('password', 'regEyeIcon')" 
+                                aria-label="Toggle password visibility" 
+                                aria-controls="password">
+                            <i id="regEyeIcon" class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div id="regPasswordValidation" class="small text-muted mb-3">
+                        Password must be 8 digits (numbers only)
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Register a new account">
+                        <span class="btn-content"><i class="bi bi-person-plus-fill me-2"></i>Register</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <p class="mt-2 text-center small">
+                    Have an account? <a href="#" onclick="showPage('loginPage')" aria-label="Login to existing account">Login</a>
+                </p>
+            </div>
+        </section>
+        <section id="forgotPasswordPage" class="page" aria-label="Forgot Password Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 400px;">
+                <h2 class="text-center mb-3">Reset Password</h2>
+                <form onsubmit="handleResetPassword(event)" novalidate>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="forgotMgtId" required aria-label="Select your MGT-ID">
+                            <option value="" disabled selected>Select MGT-ID</option>
+                            <option value="MGT-U-481">MGT-U-481</option>
+                            <option value="MGT-U-482">MGT-U-482</option>
+                        </select>
+                        <label for="forgotMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                    </div>
+                    <div class="form-floating position-relative mb-3">
+                        <input type="password" class="form-control" id="newPassword" placeholder="New Password" 
+                               pattern="\d{8}" required aria-describedby="resetPasswordValidation">
+                        <label for="newPassword"><i class="bi bi-lock-fill me-2"></i>New Password (8 digits)</label>
+                        <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3" 
+                                onclick="togglePassword('newPassword', 'resetEyeIcon')" 
+                                aria-label="Toggle password visibility" 
+                                aria-controls="newPassword">
+                            <i id="resetEyeIcon" class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div id="resetPasswordValidation" class="small text-muted mb-3">
+                        Password must be 8 digits (numbers only)
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Reset your password">
+                        <span class="btn-content"><i class="bi bi-arrow-repeat me-2"></i>Reset Password</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <p class="mt-2 text-center small">
+                    <a href="#" onclick="showPage('loginPage')" aria-label="Return to login page">Back to Login</a>
+                </p>
+            </div>
+        </section>
+        <section id="userDashboard" class="page" aria-label="Dashboard Section">
+            <div class="custom-card dashboard-card animate__animated animate__fadeIn mx-auto" style="max-width: 800px;">
+                <div class="dashboard-header">
+                    <h2>Welcome, <span id="userName"></span></h2>
+                    <div class="user-id">ID: <span id="userId"></span></div>
+                    <p>Manage your attendance with ease</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <div class="attendance-card" id="checkInCard" role="button" 
+                             onclick="submitAttendance('check-in')" 
+                             aria-label="Record check-in attendance" 
+                             tabindex="0">
+                            <div class="card-content">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                <h5>Check-In</h5>
+                                <p>Start your workday</p>
+                            </div>
+                            <div class="processing-text">Processing...</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="attendance-card" id="checkOutCard" role="button" 
+                             onclick="submitAttendance('check-out')" 
+                             aria-label="Record check-out attendance" 
+                             tabindex="0">
+                            <div class="card-content">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <h5>Check-Out</h5>
+                                <p>End your workday</p>
+                            </div>
+                            <div class="processing-text">Processing...</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="attendance-card" id="absentCard" role="button" 
+                             onclick="submitAttendance('absent')" 
+                             aria-label="Mark as absent" 
+                             tabindex="0">
+                            <div class="card-content">
+                                <i class="bi bi-x-circle"></i>
+                                <h5>Absent</h5>
+                                <p>Mark as absent</p>
+                            </div>
+                            <div class="processing-text">Processing...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn logout-btn text-white" onclick="logout()" aria-label="Log out of your account">
+                        <i class="bi bi-power me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer class="text-center py-3">
+        <p class="mb-0 small animate__animated animate__fadeInUp">© 2025 Aloha Bangladesh❤️. All Rights Reserved.</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let sessionTimeout;
+
+        function showPage(pageId) {
+            document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+            document.getElementById(pageId).classList.add("active");
+            window.scrollTo(0, 0);
+            resetSessionTimeout();
+        }
+
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            const isVisible = input.type === "password";
+            input.type = isVisible ? "text" : "password";
+            icon.classList.toggle("bi-eye-fill", isVisible);
+            icon.classList.toggle("bi-eye-slash-fill", !isVisible);
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement("div");
+            alert.className = `alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInDown`;
+            alert.role = "alert";
+            alert.innerHTML = `
+                <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill"} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.getElementById("alertContainer").appendChild(alert);
+            setTimeout(() => {
+                alert.classList.remove("animate__fadeInDown");
+                alert.classList.add("animate__fadeOutUp");
+                setTimeout(() => alert.remove(), 500);
+            }, 4000);
+        }
+
+        function toggleSpinner(button, show) {
+            const spinner = button.querySelector(".spinner-border");
+            const content = button.querySelector(".btn-content");
+            if (show) {
+                spinner.classList.remove("d-none");
+                content.classList.add("d-none");
+            } else {
+                spinner.classList.add("d-none");
+                content.classList.remove("d-none");
+            }
+        }
+
+        function resetSessionTimeout() {
+            clearTimeout(sessionTimeout);
+            sessionTimeout = setTimeout(() => {
+                if (currentUser) {
+                    logout();
+                    showAlert("Session expired due to inactivity.", "warning");
+                }
+            }, 300000);
+        }
+
+        function validateInput(inputId, validationId) {
+            const input = document.getElementById(inputId);
+            const validation = document.getElementById(validationId);
+            
+            input.addEventListener('input', () => {
+                const value = input.value;
+                const isValid = input.checkValidity();
+                
+                input.classList.remove('is-valid', 'is-invalid');
+                input.classList.add(isValid ? 'is-valid' : 'is-invalid');
+                
+                if (input.type === "password" && validation) {
+                    const passwordValid = /^\d{8}$/.test(value);
+                    if (value === '') {
+                        validation.textContent = 'Password must be 8 digits (numbers only)';
+                        validation.classList.remove('password-valid', 'password-invalid');
+                    } else if (passwordValid) {
+                        validation.textContent = '✓ Valid password';
+                        validation.classList.remove('password-invalid');
+                        validation.classList.add('password-valid');
+                    } else {
+                        validation.textContent = '✗ Password must be exactly 8 digits (numbers only)';
+                        validation.classList.remove('password-valid');
+                        validation.classList.add('password-invalid');
+                    }
+                }
+            });
+        }
+
+        function handleRegistration(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector("button[type='submit']");
+            const mgtId = document.getElementById("mgtId").value;
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (!mgtId || !name || !email || !password) {
+                showAlert("Please fill in all fields.", "danger");
+                return;
+            }
+            if (!/^\d{8}$/.test(password)) {
+                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+                return;
+            }
+
+            toggleSpinner(button, true);
+            google.script.run.withSuccessHandler(response => {
+                toggleSpinner(button, false);
+                showAlert(response.message, response.success ? "success" : "danger");
+                if (response.success || response.message.includes("Redirecting to login")) {
+                    setTimeout(() => showPage("loginPage"), 1500);
+                }
+            }).withFailureHandler(error => {
+                toggleSpinner(button, false);
+                showAlert(error.message || "Server error. Please try again.", "danger");
+            }).registerUser(mgtId, name, email, password);
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector("button[type='submit']");
+            const mgtId = document.getElementById("loginMgtId").value;
+            const password = document.getElementById("loginPassword").value;
+
+            if (!mgtId || !password) {
+                showAlert("Please select an MGT-ID and enter a password.", "danger");
+                return;
+            }
+            if (!/^\d{8}$/.test(password)) {
+                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+                return;
+            }
+
+            toggleSpinner(button, true);
+            google.script.run.withSuccessHandler(response => {
+                toggleSpinner(button, false);
+                if (response.success) {
+                    currentUser = response;
+                    sessionStorage.setItem("currentUser", JSON.stringify(response));
+                    document.getElementById("userName").textContent = response.name;
+                    document.getElementById("userId").textContent = response.mgtId;
+                    showAlert("Logged in successfully!", "success");
+                    setTimeout(() => showPage("userDashboard"), 1500);
+                    loadAttendanceState();
+                    resetSessionTimeout();
+                } else {
+                    showAlert(response.message, "danger");
+                }
+            }).withFailureHandler(error => {
+                toggleSpinner(button, false);
+                showAlert(error.message || "Server error. Please try again.", "danger");
+            }).loginUser(mgtId, password);
+        }
+
+        function handleResetPassword(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector("button[type='submit']");
+            const mgtId = document.getElementById("forgotMgtId").value;
+            const newPassword = document.getElementById("newPassword").value;
+
+            if (!mgtId || !newPassword) {
+                showAlert("Please select an MGT-ID and enter a new password.", "danger");
+                return;
+            }
+            if (!/^\d{8}$/.test(newPassword)) {
+                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+                return;
+            }
+
+            toggleSpinner(button, true);
+            google.script.run.withSuccessHandler(response => {
+                toggleSpinner(button, false);
+                showAlert(response.message, response.success ? "success" : "danger");
+                if (response.success) {
+                    setTimeout(() => showPage("loginPage"), 1500);
+                }
+            }).withFailureHandler(error => {
+                toggleSpinner(button, false);
+                showAlert(error.message || "Server error. Please try again.", "danger");
+            }).resetPassword(mgtId, newPassword);
+        }
+
+        function submitAttendance(type) {
+            if (!currentUser) {
+                showAlert("Please log in first.", "danger");
+                showPage("loginPage");
+                return;
+            }
+
+            const cardId = type === "check-in" ? "checkInCard" : type === "check-out" ? "checkOutCard" : "absentCard";
+            const card = document.getElementById(cardId);
+
+            if (card.classList.contains("disabled")) {
+                showAlert(`You have already recorded ${type.replace('-', ' ')} for today.`, "warning");
+                return;
+            }
+
+            card.classList.add("processing");
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    google.script.run.withSuccessHandler(response => {
+                        card.classList.remove("processing");
+                        if (response.success) {
+                            const today = new Date().toDateString();
+                            const attendanceState = { type, date: today };
+                            sessionStorage.setItem(`attendance_${currentUser.mgtId}`, JSON.stringify(attendanceState));
+                            updateAttendanceColors(attendanceState);
+                            card.classList.add("disabled");
+                            showAlert(response.message, "success");
+                        } else {
+                            showAlert(response.message, "danger");
+                            if (response.message.includes("check-in")) {
+                                document.getElementById("checkInCard").classList.remove("disabled");
+                            }
+                        }
+                    }).withFailureHandler(error => {
+                        card.classList.remove("processing");
+                        showAlert(error.message || "Server error. Please try again.", "danger");
+                    }).recordAttendance(currentUser.mgtId, type, lat, lon);
+                },
+                error => {
+                    card.classList.remove("processing");
+                    showAlert("Location access denied. Enable it and try again.", "danger");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+            resetSessionTimeout();
+        }
+
+        function updateAttendanceColors(state) {
+            const cards = {
+                "check-in": document.getElementById("checkInCard"),
+                "check-out": document.getElementById("checkOutCard"),
+                "absent": document.getElementById("absentCard")
+            };
+            Object.values(cards).forEach(card => card.classList.remove("check-in", "check-out", "absent", "disabled"));
+            if (state && state.type) {
+                cards[state.type].classList.add(state.type);
+                cards[state.type].classList.add("disabled");
+                if (state.type === "check-out") {
+                    cards["check-in"].classList.add("check-in", "disabled");
+                }
+            }
+        }
+
+        function loadAttendanceState() {
+            const state = JSON.parse(sessionStorage.getItem(`attendance_${currentUser.mgtId}`));
+            if (state && state.date === new Date().toDateString()) {
+                updateAttendanceColors(state);
+            } else {
+                sessionStorage.removeItem(`attendance_${currentUser.mgtId}`);
+            }
+        }
+
+        function logout() {
+            clearTimeout(sessionTimeout);
+            sessionStorage.removeItem("currentUser");
+            sessionStorage.removeItem(`attendance_${currentUser.mgtId}`);
+            currentUser = null;
+            showAlert("Logged out successfully.", "success");
+            showPage("loginPage");
+            document.querySelectorAll(".attendance-card").forEach(card => {
+                card.classList.remove("disabled", "check-in", "check-out", "absent");
+            });
+        }
+
+        window.onload = () => {
+            const user = JSON.parse(sessionStorage.getItem("currentUser"));
+            if (user) {
+                currentUser = user;
+                document.getElementById("userName").textContent = user.name;
+                document.getElementById("userId").textContent = user.mgtId;
+                showPage("userDashboard");
+                loadAttendanceState();
+                resetSessionTimeout();
+            } else {
+                showPage("loginPage");
+            }
+            validateInput('loginPassword', 'passwordValidation');
+            validateInput('password', 'regPasswordValidation');
+            validateInput('newPassword', 'resetPasswordValidation');
+            validateInput('name', null);
+            validateInput('email', null);
+            validateInput('loginMgtId', null);
+            validateInput('mgtId', null);
+            validateInput('forgotMgtId', null);
+            
+            document.querySelectorAll(".attendance-card").forEach(card => {
+                card.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        card.click();
+                    }
+                });
+            });
+        };
+
+        document.addEventListener("mousemove", resetSessionTimeout);
+        document.addEventListener("keypress", resetSessionTimeout);
+    </script>
+</body>
+</html>
