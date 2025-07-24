@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Attendance Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            flex: 1;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
+
+        .custom-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            background: white;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            transition: background-color 0.3s;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-primary .spinner-border {
+            margin-right: 0.5rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .navbar {
+            background: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #007bff, #00c4ff);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .dashboard-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-header .user-id {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .attendance-card {
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+            min-height: 120px;
+            background: white;
+        }
+
+        .attendance-card:hover:not(.processing):not(.disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .attendance-card i {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            color: #007bff;
+        }
+
+        .attendance-card h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .attendance-card p {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .attendance-card.processing {
+            background: #e9ecef;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .attendance-card.processing .card-content {
+            display: none;
+        }
+
+        .attendance-card .processing-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1rem;
+            font-weight: 600;
+            color: #495057;
+            display: none;
+        }
+
+        .attendance-card.processing .processing-text {
+            display: block;
+        }
+
+        .attendance-card.check-in {
+            background: #d4edda;
+        }
+
+        .attendance-card.check-out {
+            background: #cce5ff;
+        }
+
+        .attendance-card.absent {
+            background: #f8d7da;
+        }
+
+        .attendance-card.disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        footer {
+            background: #212529;
+            color: #ffffff;
+        }
+
+        .password-valid {
+            color: #28a745;
+        }
+
+        .password-invalid {
+            color: #dc3545;
+        }
+
+        .form-floating label i {
+            opacity: 0.7;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#" aria-label="Aloha Bangladesh Employee Attendance System">
+                <img src="https://www.alohabdonline.com/wp-content/uploads/2020/04/ALOHA-Logo-800-px-X-180-px.png"
+                    class="img-fluid me-2" style="max-height: 40px;" alt="Aloha Bangladesh Logo">
+                Employee Attendance System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="https://drive.google.com/file/d/1Dc3hpWpTE2bB35-f2UEFEQEy7KUWDK-E/view?usp=drive_link"
+                            class="nav-link btn btn-primary btn-sm text-white mx-1" download="Leave_Form.pdf"
+                            aria-label="Download Leave Form">
+                            <i class="fas fa-file-pdf me-1"></i> Leave Form
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://drive.google.com/file/d/1wZP-_X_783B4uyXjtKVHkPkpQDdKmWVU/view?usp=drive_link"
+                            class="nav-link btn btn-sm btn-primary text-white mx-1" download="Replace_Form.pdf"
+                            aria-label="Download Replace Form">
+                            <i class="fas fa-file-pdf me-1"></i> Replace Form
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="alertContainer" class="alert-container" role="region" aria-live="polite"></div>
+    <div class="container py-4">
+        <section id="loginPage" class="page active" aria-label="Login Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 400px;">
+                <h2 class="text-center mb-3">Login</h2>
+                <form onsubmit="handleLogin(event)" novalidate>
+                    <div class="form-floating mb-3 autocomplete-container">
+                        <input type="text" class="form-control" id="loginMgtId" list="mgtIdList" required placeholder=" ">
+                        <label for="loginMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                    </div>
+                    <div class="form-floating position-relative mb-3">
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Password"
+                            pattern="\d{8}" required aria-describedby="passwordValidation">
+                        <label for="loginPassword"><i class="bi bi-lock-fill me-2"></i>Password (8 digits)</label>
+                        <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
+                            onclick="togglePassword('loginPassword', 'loginEyeIcon')"
+                            aria-label="Toggle password visibility" aria-controls="loginPassword">
+                            <i id="loginEyeIcon" class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div id="passwordValidation" class="small text-muted mb-3">
+                        Password must be 8 digits (numbers only)
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Login to your account">
+                        <span class="btn-content"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <p class="mt-2 text-center small">
+                    <a href="#" onclick="showPage('forgotPasswordPage')" aria-label="Forgot your password?">Forgot
+                        Password?</a> |
+                    New user? <a href="#" onclick="showPage('registrationPage')"
+                        aria-label="Register a new account">Register</a>
+                </p>
+            </div>
+        </section>
+        <section id="registrationPage" class="page" aria-label="Registration Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 400px;">
+                <h2 class="text-center mb-3">Register</h2>
+                <form onsubmit="handleRegistration(event)" novalidate>
+                    <div class="form-floating mb-3 autocomplete-container">
+                        <input type="text" class="form-control" id="mgtId" list="mgtIdList" required placeholder=" ">
+                        <label for="mgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="name" placeholder="Name" required
+                            aria-label="Enter your name">
+                        <label for="name"><i class="bi bi-person-lines-fill me-2"></i>Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" placeholder="Email" required
+                            aria-label="Enter your email">
+                        <label for="email"><i class="bi bi-envelope-fill me-2"></i>Email</label>
+                    </div>
+                    <div class="form-floating position-relative mb-3">
+                        <input type="password" class="form-control" id="password" placeholder="Password" pattern="\d{8}"
+                            required aria-describedby="regPasswordValidation">
+                        <label for="password"><i class="bi bi-lock-fill me-2"></i>Password (8 digits)</label>
+                        <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
+                            onclick="togglePassword('password', 'regEyeIcon')" aria-label="Toggle password visibility"
+                            aria-controls="password">
+                            <i id="regEyeIcon" class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div id="regPasswordValidation" class="small text-muted mb-3">
+                        Password must be 8 digits (numbers only)
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Register a new account">
+                        <span class="btn-content"><i class="bi bi-person-plus-fill me-2"></i>Register</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <p class="mt-2 text-center small">
+                    Have an account? <a href="#" onclick="showPage('loginPage')"
+                        aria-label="Login to existing account">Login</a>
+                </p>
+            </div>
+        </section>
+        <section id="forgotPasswordPage" class="page" aria-label="Forgot Password Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 400px;">
+                <h2 class="text-center mb-3">Reset Password</h2>
+                <form onsubmit="handleResetPassword(event)" novalidate>
+                    <div class="form-floating mb-3 autocomplete-container">
+                        <input type="text" class="form-control" id="forgotMgtId" list="mgtIdList" required placeholder=" ">
+                        <label for="forgotMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                    </div>
+                    <div class="form-floating position-relative mb-3">
+                        <input type="password" class="form-control" id="newPassword" placeholder="New Password"
+                            pattern="\d{8}" required aria-describedby="resetPasswordValidation">
+                        <label for="newPassword"><i class="bi bi-lock-fill me-2"></i>New Password (8 digits)</label>
+                        <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
+                            onclick="togglePassword('newPassword', 'resetEyeIcon')"
+                            aria-label="Toggle password visibility" aria-controls="newPassword">
+                            <i id="resetEyeIcon" class="bi bi-eye-fill"></i>
+                        </button>
+                    </div>
+                    <div id="resetPasswordValidation" class="small text-muted mb-3">
+                        Password must be 8 digits (numbers only)
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Reset your password">
+                        <span class="btn-content"><i class="bi bi-arrow-repeat me-2"></i>Reset Password</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </form>
+                <p class="mt-2 text-center small">
+                    <a href="#" onclick="showPage('loginPage')" aria-label="Return to login page">Back to Login</a>
+                </p>
+            </div>
+        </section>
+        <section id="userDashboard" class="page" aria-label="Dashboard Section">
+            <div class="custom-card dashboard-card animate__animated animate__fadeIn mx-auto" style="max-width: 800px;">
+                <div class="dashboard-header">
+                    <h2>Welcome, <span id="userName"></span></h2>
+                    <div class="user-id">ID: <span id="userId"></span></div>
+                    <p>Manage your attendance with ease</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <div class="attendance-card" id="checkInCard" role="button"
+                            onclick="submitAttendance('check-in')" aria-label="Record check-in attendance" tabindex="0">
+                            <div class="card-content">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                <h5>Check-In</h5>
+                                <p>Start your workday</p>
+                            </div>
+                            <div class="processing-text">Processing...</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="attendance-card" id="checkOutCard" role="button"
+                            onclick="submitAttendance('check-out')" aria-label="Record check-out attendance"
+                            tabindex="0">
+                            <div class="card-content">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <h5>Check-Out</h5>
+                                <p>End your workday</p>
+                            </div>
+                            <div class="processing-text">Processing...</div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="attendance-card" id="absentCard" role="button" onclick="submitAttendance('absent')"
+                            aria-label="Mark as absent" tabindex="0">
+                            <div class="card-content">
+                                <i class="bi bi-x-circle"></i>
+                                <h5>Absent</h5>
+                                <p>Mark as absent</p>
+                            </div>
+                            <div class="processing-text">Processing...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4 d-flex justify-content-center gap-2">
+                    <button id="viewHistoryBtn" class="btn btn-secondary" aria-label="View my attendance history">
+                        <i class="bi bi-calendar-check me-2"></i>View My Attendance
+                    </button>
+                    <button class="btn logout-btn text-white" onclick="logout()" aria-label="Log out of your account">
+                        <i class="bi bi-power me-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="historyPage" class="page" aria-label="Attendance History Section">
+            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 800px;">
+                <h2 class="text-center mb-3">My Attendance History</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- History rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="noHistoryMessage" class="text-center my-3" style="display: none;">
+                    <p>No attendance records found.</p>
+                </div>
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary" onclick="showPage('userDashboard')" aria-label="Back to dashboard">
+                        <i class="bi bi-arrow-left-circle me-2"></i>Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer class="text-center py-3">
+        <p class="mb-0 small animate__animated animate__fadeInUp">© 2025 Aloha Bangladesh❤️. All Rights Reserved.</p>
+    </footer>
+    <datalist id="mgtIdList"></datalist>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let sessionTimeout;
+        let employeeList = [];
+
+        function showPage(pageId) {
+            document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+            document.getElementById(pageId).classList.add("active");
+            window.scrollTo(0, 0);
+            resetSessionTimeout();
+        }
+
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            const isVisible = input.type === "password";
+            input.type = isVisible ? "text" : "password";
+            icon.classList.toggle("bi-eye-fill", isVisible);
+            icon.classList.toggle("bi-eye-slash-fill", !isVisible);
+        }
+
+        function showAlert(message, type) {
+            const alert = document.createElement("div");
+            alert.className = `alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInDown`;
+            alert.role = "alert";
+            alert.innerHTML = `
+                <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill"} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.getElementById("alertContainer").appendChild(alert);
+            setTimeout(() => {
+                alert.classList.remove("animate__fadeInDown");
+                alert.classList.add("animate__fadeOutUp");
+                setTimeout(() => alert.remove(), 500);
+            }, 4000);
+        }
+
+        function toggleSpinner(button, show) {
+            const spinner = button.querySelector(".spinner-border");
+            const content = button.querySelector(".btn-content");
+            if (show) {
+                spinner.classList.remove("d-none");
+                content.classList.add("d-none");
+            } else {
+                spinner.classList.add("d-none");
+                content.classList.remove("d-none");
+            }
+        }
+
+        function resetSessionTimeout() {
+            clearTimeout(sessionTimeout);
+            sessionTimeout = setTimeout(() => {
+                if (currentUser) {
+                    logout();
+                    showAlert("Session expired due to inactivity.", "warning");
+                }
+            }, 300000);
+        }
+
+        function validateInput(inputId, validationId) {
+            const input = document.getElementById(inputId);
+            const validation = document.getElementById(validationId);
+
+            input.addEventListener('input', () => {
+                const value = input.value;
+                const isValid = input.checkValidity();
+
+                input.classList.remove('is-valid', 'is-invalid');
+                input.classList.add(isValid ? 'is-valid' : 'is-invalid');
+
+                if (input.type === "password" && validation) {
+                    const passwordValid = /^\d{8}$/.test(value);
+                    if (value === '') {
+                        validation.textContent = 'Password must be 8 digits (numbers only)';
+                        validation.classList.remove('password-valid', 'password-invalid');
+                    } else if (passwordValid) {
+                        validation.textContent = '✓ Valid password';
+                        validation.classList.remove('password-invalid');
+                        validation.classList.add('password-valid');
+                    } else {
+                        validation.textContent = '✗ Password must be exactly 8 digits (numbers only)';
+                        validation.classList.remove('password-valid');
+                        validation.classList.add('password-invalid');
+                    }
+                }
+            });
+        }
+
+        function handleRegistration(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector("button[type='submit']");
+            const mgtId = document.getElementById("mgtId").value;
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (!mgtId || !name || !email || !password) {
+                showAlert("Please fill in all fields.", "danger");
+                return;
+            }
+            if (!/^\d{8}$/.test(password)) {
+                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+                return;
+            }
+
+            toggleSpinner(button, true);
+            google.script.run.withSuccessHandler(response => {
+                toggleSpinner(button, false);
+                showAlert(response.message, response.success ? "success" : "danger");
+                if (response.success || response.message.includes("Redirecting to login")) {
+                    setTimeout(() => showPage("loginPage"), 1500);
+                }
+            }).withFailureHandler(error => {
+                toggleSpinner(button, false);
+                showAlert(error.message || "Server error. Please try again.", "danger");
+            }).registerUser(mgtId, name, email, password);
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector("button[type='submit']");
+            const mgtId = document.getElementById("loginMgtId").value;
+            const password = document.getElementById("loginPassword").value;
+
+            if (!mgtId || !password) {
+                showAlert("Please select an MGT-ID and enter a password.", "danger");
+                return;
+            }
+            if (!/^\d{8}$/.test(password)) {
+                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+                return;
+            }
+
+            toggleSpinner(button, true);
+            google.script.run.withSuccessHandler(response => {
+                toggleSpinner(button, false);
+                if (response.success) {
+                    currentUser = response;
+                    sessionStorage.setItem("currentUser", JSON.stringify(response));
+                    document.getElementById("userName").textContent = response.name;
+                    document.getElementById("userId").textContent = response.userId;
+                    showAlert("Logged in successfully!", "success");
+                    updateAttendanceUI(response.userId);
+                    setupDashboardButtons(response.userId);
+                    setTimeout(() => showPage("userDashboard"), 1500);
+                    resetSessionTimeout();
+                } else {
+                    showAlert(response.message, "danger");
+                }
+            }).withFailureHandler(error => {
+                toggleSpinner(button, false);
+                showAlert(error.message || "Server error. Please try again.", "danger");
+            }).loginUser(mgtId, password);
+        }
+
+        function handleResetPassword(event) {
+            event.preventDefault();
+            const form = event.target;
+            const button = form.querySelector("button[type='submit']");
+            const mgtId = document.getElementById("forgotMgtId").value;
+            const newPassword = document.getElementById("newPassword").value;
+
+            if (!mgtId || !newPassword) {
+                showAlert("Please select an MGT-ID and enter a new password.", "danger");
+                return;
+            }
+            if (!/^\d{8}$/.test(newPassword)) {
+                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+                return;
+            }
+
+            toggleSpinner(button, true);
+            google.script.run.withSuccessHandler(response => {
+                toggleSpinner(button, false);
+                showAlert(response.message, response.success ? "success" : "danger");
+                if (response.success) {
+                    setTimeout(() => showPage("loginPage"), 1500);
+                }
+            }).withFailureHandler(error => {
+                toggleSpinner(button, false);
+                showAlert(error.message || "Server error. Please try again.", "danger");
+            }).resetPassword(mgtId, newPassword);
+        }
+
+        function submitAttendance(type) {
+            if (!currentUser) {
+                showAlert("Please log in first.", "danger");
+                showPage("loginPage");
+                return;
+            }
+
+            const cardId = type === "check-in" ? "checkInCard" : type === "check-out" ? "checkOutCard" : "absentCard";
+            const card = document.getElementById(cardId);
+
+            if (card.classList.contains("disabled")) {
+                showAlert(`You have already recorded ${type.replace('-', ' ')} for today.`, "warning");
+                return;
+            }
+
+            card.classList.add("processing");
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    google.script.run.withSuccessHandler(response => {
+                        card.classList.remove("processing");
+                        if (response.success) {
+                            showAlert(response.message, "success");
+                            updateAttendanceUI(currentUser.userId);
+                        } else {
+                            showAlert(response.message, "danger");
+                            if (response.message.includes("check-in")) {
+                                document.getElementById("checkInCard").classList.remove("disabled");
+                            }
+                        }
+                    }).withFailureHandler(error => {
+                        card.classList.remove("processing");
+                        showAlert(error.message || "Server error. Please try again.", "danger");
+                    }).recordAttendance(currentUser.userId, type, lat, lon);
+                },
+                error => {
+                    card.classList.remove("processing");
+                    showAlert("Location access denied. Enable it and try again.", "danger");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+            resetSessionTimeout();
+        }
+
+        function updateAttendanceUI(mgtId) {
+            google.script.run.withSuccessHandler(status => {
+                const checkInCard = document.getElementById("checkInCard");
+                const checkOutCard = document.getElementById("checkOutCard");
+                const absentCard = document.getElementById("absentCard");
+
+                // Reset all cards
+                [checkInCard, checkOutCard, absentCard].forEach(card => {
+                    card.classList.remove("check-in", "check-out", "absent", "disabled");
+                });
+
+                switch (status) {
+                    case "checked-in":
+                        checkInCard.classList.add("check-in", "disabled");
+                        absentCard.classList.add("disabled");
+                        break;
+                    case "checked-out":
+                        checkInCard.classList.add("check-in", "disabled");
+                        checkOutCard.classList.add("check-out", "disabled");
+                        absentCard.classList.add("disabled");
+                        break;
+                    case "absent":
+                        absentCard.classList.add("absent", "disabled");
+                        checkInCard.classList.add("disabled");
+                        checkOutCard.classList.add("disabled");
+                        break;
+                    case "none":
+                        // All cards are enabled by default
+                        break;
+                    case "error":
+                        showAlert("Could not retrieve attendance status.", "danger");
+                        break;
+                }
+            }).getTodaysAttendanceStatus(mgtId);
+        }
+
+        function logout() {
+            clearTimeout(sessionTimeout);
+            sessionStorage.removeItem("currentUser");
+            // The attendance_ item is no longer needed with real-time sync
+            currentUser = null;
+            showAlert("Logged out successfully.", "success");
+            showPage("loginPage");
+            document.querySelectorAll(".attendance-card").forEach(card => {
+                card.classList.remove("disabled", "check-in", "check-out", "absent");
+            });
+        }
+
+        function populateMgtIdDatalist(employees) {
+            const datalist = document.getElementById('mgtIdList');
+            datalist.innerHTML = ''; // Clear existing options
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.mgtId;
+                option.textContent = emp.name;
+                datalist.appendChild(option);
+            });
+        }
+
+        function handleMgtIdInput(event) {
+            const mgtId = event.target.value;
+            const employee = employeeList.find(emp => emp.mgtId === mgtId);
+            if (employee) {
+                const nameInput = document.getElementById('name');
+                if (nameInput) {
+                    nameInput.value = employee.name;
+                    nameInput.readOnly = true;
+                }
+            } else {
+                const nameInput = document.getElementById('name');
+                if (nameInput) {
+                    nameInput.value = '';
+                    nameInput.readOnly = false;
+                }
+            }
+        }
+
+        window.onload = () => {
+            google.script.run.withSuccessHandler(employees => {
+                employeeList = employees;
+                populateMgtIdDatalist(employees);
+            }).getEmployeeData();
+
+            const user = JSON.parse(sessionStorage.getItem("currentUser"));
+            if (user) {
+                currentUser = user;
+                document.getElementById("userName").textContent = user.name;
+                document.getElementById("userId").textContent = user.userId;
+                showPage("userDashboard");
+                updateAttendanceUI(user.userId);
+                setupDashboardButtons(user.userId);
+                resetSessionTimeout();
+            } else {
+                showPage("loginPage");
+            }
+            validateInput('loginPassword', 'passwordValidation');
+            validateInput('password', 'regPasswordValidation');
+            validateInput('newPassword', 'resetPasswordValidation');
+            validateInput('name', null);
+            validateInput('email', null);
+            validateInput('loginMgtId', null);
+            validateInput('mgtId', null);
+            validateInput('forgotMgtId', null);
+
+            document.getElementById('mgtId').addEventListener('input', handleMgtIdInput);
+
+            document.querySelectorAll(".attendance-card").forEach(card => {
+                card.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        card.click();
+                    }
+                });
+            });
+        };
+
+        function setupDashboardButtons(userId) {
+            const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+            if (viewHistoryBtn) {
+                // To avoid attaching multiple listeners, we assign directly
+                viewHistoryBtn.onclick = () => showAttendanceHistory(userId);
+            }
+        }
+
+        function showAttendanceHistory(userId) {
+            if (!userId) {
+                const user = JSON.parse(sessionStorage.getItem("currentUser"));
+                if (!user || !user.userId) {
+                    showAlert("Could not identify the current user. Please log in again.", "danger");
+                    return;
+                }
+                userId = user.userId;
+            }
+            
+            console.log("showAttendanceHistory called with userId:", userId);
+            
+            showPage('historyPage');
+            const tableBody = document.getElementById('historyTableBody');
+            const noHistoryMessage = document.getElementById('noHistoryMessage');
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading history...</td></tr>';
+            noHistoryMessage.style.display = 'none';
+
+            google.script.run.withSuccessHandler(history => {
+                tableBody.innerHTML = ''; // Clear loading message
+                if (history && history.length > 0) {
+                    history.forEach(record => {
+                        const row = tableBody.insertRow();
+                        row.innerHTML = `
+                            <td>${record.date}</td>
+                            <td>${record.checkIn}</td>
+                            <td>${record.checkOut}</td>
+                            <td>${record.status}</td>
+                        `;
+                    });
+                } else {
+                    noHistoryMessage.style.display = 'block';
+                }
+            }).withFailureHandler(error => {
+                tableBody.innerHTML = '';
+                showAlert("Failed to load attendance history.", "danger");
+            }).getUserAttendanceHistory(userId);
+        }
+
+        document.addEventListener("mousemove", resetSessionTimeout);
+        document.addEventListener("keypress", resetSessionTimeout);
+    </script>
+</body>
+
+</html>
