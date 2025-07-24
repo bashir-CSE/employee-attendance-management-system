@@ -256,13 +256,14 @@
                 <h2 class="text-center mb-3">Login</h2>
                 <form onsubmit="handleLogin(event)" novalidate>
                     <div class="form-floating mb-3 autocomplete-container">
-                        <input type="text" class="form-control" id="loginMgtId" list="mgtIdList" required placeholder=" ">
+                        <input type="text" class="form-control" id="loginMgtId" list="mgtIdList" required
+                            placeholder=" ">
                         <label for="loginMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
                     </div>
                     <div class="form-floating position-relative mb-3">
                         <input type="password" class="form-control" id="loginPassword" placeholder="Password"
-                            pattern="\d{8}" required aria-describedby="passwordValidation">
-                        <label for="loginPassword"><i class="bi bi-lock-fill me-2"></i>Password (8 digits)</label>
+                            pattern="\d{4}" required aria-describedby="passwordValidation">
+                        <label for="loginPassword"><i class="bi bi-lock-fill me-2"></i>Password (4 digits)</label>
                         <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
                             onclick="togglePassword('loginPassword', 'loginEyeIcon')"
                             aria-label="Toggle password visibility" aria-controls="loginPassword">
@@ -270,7 +271,7 @@
                         </button>
                     </div>
                     <div id="passwordValidation" class="small text-muted mb-3">
-                        Password must be 8 digits (numbers only)
+                        Password must be 4 digits (numbers only)
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Login to your account">
                         <span class="btn-content"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
@@ -304,9 +305,9 @@
                         <label for="email"><i class="bi bi-envelope-fill me-2"></i>Email</label>
                     </div>
                     <div class="form-floating position-relative mb-3">
-                        <input type="password" class="form-control" id="password" placeholder="Password" pattern="\d{8}"
+                        <input type="password" class="form-control" id="password" placeholder="Password" pattern="\d{4}"
                             required aria-describedby="regPasswordValidation">
-                        <label for="password"><i class="bi bi-lock-fill me-2"></i>Password (8 digits)</label>
+                        <label for="password"><i class="bi bi-lock-fill me-2"></i>Password (4 digits)</label>
                         <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
                             onclick="togglePassword('password', 'regEyeIcon')" aria-label="Toggle password visibility"
                             aria-controls="password">
@@ -314,7 +315,7 @@
                         </button>
                     </div>
                     <div id="regPasswordValidation" class="small text-muted mb-3">
-                        Password must be 8 digits (numbers only)
+                        Password must be 4 digits (numbers only)
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Register a new account">
                         <span class="btn-content"><i class="bi bi-person-plus-fill me-2"></i>Register</span>
@@ -332,13 +333,14 @@
                 <h2 class="text-center mb-3">Reset Password</h2>
                 <form onsubmit="handleResetPassword(event)" novalidate>
                     <div class="form-floating mb-3 autocomplete-container">
-                        <input type="text" class="form-control" id="forgotMgtId" list="mgtIdList" required placeholder=" ">
+                        <input type="text" class="form-control" id="forgotMgtId" list="mgtIdList" required
+                            placeholder=" ">
                         <label for="forgotMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
                     </div>
                     <div class="form-floating position-relative mb-3">
                         <input type="password" class="form-control" id="newPassword" placeholder="New Password"
-                            pattern="\d{8}" required aria-describedby="resetPasswordValidation">
-                        <label for="newPassword"><i class="bi bi-lock-fill me-2"></i>New Password (8 digits)</label>
+                            pattern="\d{4}" required aria-describedby="resetPasswordValidation">
+                        <label for="newPassword"><i class="bi bi-lock-fill me-2"></i>New Password (4 digits)</label>
                         <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
                             onclick="togglePassword('newPassword', 'resetEyeIcon')"
                             aria-label="Toggle password visibility" aria-controls="newPassword">
@@ -346,7 +348,7 @@
                         </button>
                     </div>
                     <div id="resetPasswordValidation" class="small text-muted mb-3">
-                        Password must be 8 digits (numbers only)
+                        Password must be 4 digits (numbers only)
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Reset your password">
                         <span class="btn-content"><i class="bi bi-arrow-repeat me-2"></i>Reset Password</span>
@@ -518,16 +520,16 @@
                 input.classList.add(isValid ? 'is-valid' : 'is-invalid');
 
                 if (input.type === "password" && validation) {
-                    const passwordValid = /^\d{8}$/.test(value);
+                    const passwordValid = /^\d{4}$/.test(value);
                     if (value === '') {
-                        validation.textContent = 'Password must be 8 digits (numbers only)';
+                        validation.textContent = 'Password must be 4 digits (numbers only)';
                         validation.classList.remove('password-valid', 'password-invalid');
                     } else if (passwordValid) {
                         validation.textContent = '✓ Valid password';
                         validation.classList.remove('password-invalid');
                         validation.classList.add('password-valid');
                     } else {
-                        validation.textContent = '✗ Password must be exactly 8 digits (numbers only)';
+                        validation.textContent = '✗ Password must be exactly 4 digits (numbers only)';
                         validation.classList.remove('password-valid');
                         validation.classList.add('password-invalid');
                     }
@@ -548,8 +550,8 @@
                 showAlert("Please fill in all fields.", "danger");
                 return;
             }
-            if (!/^\d{8}$/.test(password)) {
-                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+            if (!/^\d{4}$/.test(password)) {
+                showAlert("Password must be exactly 4 digits (numbers only).", "danger");
                 return;
             }
 
@@ -577,8 +579,8 @@
                 showAlert("Please select an MGT-ID and enter a password.", "danger");
                 return;
             }
-            if (!/^\d{8}$/.test(password)) {
-                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+            if (!/^\d{4}$/.test(password)) {
+                showAlert("Password must be exactly 4 digits (numbers only).", "danger");
                 return;
             }
 
@@ -615,8 +617,8 @@
                 showAlert("Please select an MGT-ID and enter a new password.", "danger");
                 return;
             }
-            if (!/^\d{8}$/.test(newPassword)) {
-                showAlert("Password must be exactly 8 digits (numbers only).", "danger");
+            if (!/^\d{4}$/.test(newPassword)) {
+                showAlert("Password must be exactly 4 digits (numbers only).", "danger");
                 return;
             }
 
@@ -812,9 +814,9 @@
                 }
                 userId = user.userId;
             }
-            
+
             console.log("showAttendanceHistory called with userId:", userId);
-            
+
             showPage('historyPage');
             const tableBody = document.getElementById('historyTableBody');
             const noHistoryMessage = document.getElementById('noHistoryMessage');

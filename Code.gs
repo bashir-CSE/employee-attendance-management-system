@@ -16,8 +16,8 @@ function registerUser(mgtId, name, email, password) {
         const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Users");
         if (!sheet) throw new Error("Users sheet not found.");
         
-        if (!/^\d{8}$/.test(password)) {
-            return { success: false, message: "Password must be exactly 8 digits (numeric only)." };
+        if (!/^\d{4}$/.test(password)) {
+            return { success: false, message: "Password must be exactly 4 digits (numeric only)." };
         }
         if (!name || name.trim() === "") {
             return { success: false, message: "Name cannot be empty." };
@@ -299,8 +299,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 function resetPassword(mgtId, newPassword) {
     try {
-        if (!/^\d{8}$/.test(newPassword)) {
-            return { success: false, message: "New password must be exactly 8 digits (numeric only)." };
+        if (!/^\d{4}$/.test(newPassword)) {
+            return { success: false, message: "New password must be exactly 4 digits (numeric only)." };
         }
 
         const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Users");
