@@ -114,57 +114,6 @@ function getTodaysAttendanceStatus(mgtId) {
     }
 }
 
-function getUserAttendanceHistory(mgtId) {
-    Logger.log(`getUserAttendanceHistory called with mgtId: ${mgtId}`);
-    try {
-        const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Attendance");
-        if (!sheet) throw new Error("Attendance sheet not found.");
-
-        const data = sheet.getDataRange().getValues();
-        Logger.log(`Found ${data.length} rows in Attendance sheet`);
-        const history = [];
-
-        // Start from row 1 to skip header
-        for (let i = 1; i < data.length; i++) {
-            const sheetMgtId = String(data[i][0]).trim().toUpperCase();
-            const searchMgtId = String(mgtId).trim().toUpperCase();
-            Logger.log(`Checking row ${i + 1}: Sheet MGT-ID: '${sheetMgtId}' | Comparing with: '${searchMgtId}'`);
-            
-            if (sheetMgtId === searchMgtId) {
-                Logger.log(`Match found for row ${i + 1}`);
-                try {
-                    // Handle date formatting safely
-                    let formattedDate = "-";
-                    if (data[i][1]) {
-                        try {
-                            // Corrected date formatting syntax
-                            formattedDate = Utilities.formatDate(new Date(data[i][1]), Session.getScriptTimeZone(), "dd-MMM-yyyy");
-                        } catch (e) {
-                            formattedDate = data[i][1]; // Fall back to raw value
-                            Logger.log(`Date format error for row ${i+1}: ${e.message}. Using raw value: ${formattedDate}`);
-                        }
-                    }
-                    
-                    history.push({
-                        date: formattedDate,
-                        checkIn: data[i][2] || "-",
-                        checkOut: data[i][3] || "-",
-                        status: data[i][4] || "-"
-                    });
-                } catch (e) {
-                    Logger.log(`Skipping row ${i + 1} due to a data error: ${e.message}`);
-                }
-            }
-        }
-        Logger.log(`Found ${history.length} matching records for ${mgtId}`);
-        // Return the most recent records first
-        return history.reverse();
-    } catch (error) {
-        Logger.log("getUserAttendanceHistory error: " + error.message);
-        return []; // Return empty array on error
-    }
-}
-
 function loginUser(mgtId, password) {
     try {
         const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Users");

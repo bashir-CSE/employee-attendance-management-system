@@ -404,9 +404,6 @@
                     </div>
                 </div>
                 <div class="text-center mt-4 d-flex justify-content-center gap-2">
-                    <button id="viewHistoryBtn" class="btn btn-secondary" aria-label="View my attendance history">
-                        <i class="bi bi-calendar-check me-2"></i>View My Attendance
-                    </button>
                     <button class="btn logout-btn text-white" onclick="logout()" aria-label="Log out of your account">
                         <i class="bi bi-power me-2"></i>Logout
                     </button>
@@ -414,37 +411,21 @@
             </div>
         </section>
 
-        <section id="historyPage" class="page" aria-label="Attendance History Section">
-            <div class="custom-card animate__animated animate__fadeIn mx-auto" style="max-width: 800px;">
-                <h2 class="text-center mb-3">My Attendance History</h2>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Date</th>
-                                <th>Check-In</th>
-                                <th>Check-Out</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody">
-                            <!-- History rows will be inserted here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="noHistoryMessage" class="text-center my-3" style="display: none;">
-                    <p>No attendance records found.</p>
-                </div>
-                <div class="text-center mt-3">
-                    <button class="btn btn-primary" onclick="showPage('userDashboard')" aria-label="Back to dashboard">
-                        <i class="bi bi-arrow-left-circle me-2"></i>Back to Dashboard
-                    </button>
-                </div>
-            </div>
         </section>
     </div>
-    <footer class="text-center py-3">
-        <p class="mb-0 small animate__animated animate__fadeInUp">© 2025 Aloha Bangladesh❤️. All Rights Reserved.</p>
+    <footer class="text-center py-3 bg-dark text-light">
+        <div class="container">
+            <p class="mb-1 fw-normal fs-6">Developed by <b class="text-white">Md Bashir Ahmed &#129505;</b>, Officer-IT</p>
+            <p class="mb-1 fs-6">ALOHA Bangladesh</p>
+            <p class="mb-0">
+                <a href="https://www.linkedin.com/in/bashir-6923131b0/" target="_blank"
+                    class="text-info text-decoration-none mx-1" aria-label="Visit LinkedIn profile">
+                    <i class="fab fa-linkedin"></i> LinkedIn
+                </a>
+                <span class="text-light mx-1">|</span>
+                <span class="text-light fs-6">Open to your thoughts and feedback.</span>
+            </p>
+        </div>
     </footer>
     <datalist id="mgtIdList"></datalist>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -590,12 +571,13 @@
                 if (response.success) {
                     currentUser = response;
                     sessionStorage.setItem("currentUser", JSON.stringify(response));
+                    console.log("handleLogin: currentUser set to:", currentUser); // Added log
+                    console.log("handleLogin: sessionStorage after set:", sessionStorage.getItem("currentUser")); // Added log
                     document.getElementById("userName").textContent = response.name;
                     document.getElementById("userId").textContent = response.userId;
                     showAlert("Logged in successfully!", "success");
                     updateAttendanceUI(response.userId);
-                    setupDashboardButtons(response.userId);
-                    setTimeout(() => showPage("userDashboard"), 1500);
+                    showPage("userDashboard");
                     resetSessionTimeout();
                 } else {
                     showAlert(response.message, "danger");
@@ -765,15 +747,17 @@
             }).getEmployeeData();
 
             const user = JSON.parse(sessionStorage.getItem("currentUser"));
+            console.log("window.onload: user from sessionStorage:", user); // Added log
             if (user) {
                 currentUser = user;
+                console.log("window.onload: currentUser set to:", currentUser); // Added log
                 document.getElementById("userName").textContent = user.name;
                 document.getElementById("userId").textContent = user.userId;
                 showPage("userDashboard");
                 updateAttendanceUI(user.userId);
-                setupDashboardButtons(user.userId);
                 resetSessionTimeout();
             } else {
+                console.log("window.onload: No user found in sessionStorage. Showing login page."); // Added log
                 showPage("loginPage");
             }
             validateInput('loginPassword', 'passwordValidation');
@@ -797,56 +781,7 @@
             });
         };
 
-        function setupDashboardButtons(userId) {
-            const viewHistoryBtn = document.getElementById('viewHistoryBtn');
-            if (viewHistoryBtn) {
-                // To avoid attaching multiple listeners, we assign directly
-                viewHistoryBtn.onclick = () => showAttendanceHistory(userId);
-            }
-        }
-
-        function showAttendanceHistory(userId) {
-            if (!userId) {
-                const user = JSON.parse(sessionStorage.getItem("currentUser"));
-                if (!user || !user.userId) {
-                    showAlert("Could not identify the current user. Please log in again.", "danger");
-                    return;
-                }
-                userId = user.userId;
-            }
-
-            console.log("showAttendanceHistory called with userId:", userId);
-
-            showPage('historyPage');
-            const tableBody = document.getElementById('historyTableBody');
-            const noHistoryMessage = document.getElementById('noHistoryMessage');
-            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading history...</td></tr>';
-            noHistoryMessage.style.display = 'none';
-
-            google.script.run.withSuccessHandler(history => {
-                tableBody.innerHTML = ''; // Clear loading message
-                if (history && history.length > 0) {
-                    history.forEach(record => {
-                        const row = tableBody.insertRow();
-                        row.innerHTML = `
-                            <td>${record.date}</td>
-                            <td>${record.checkIn}</td>
-                            <td>${record.checkOut}</td>
-                            <td>${record.status}</td>
-                        `;
-                    });
-                } else {
-                    noHistoryMessage.style.display = 'block';
-                }
-            }).withFailureHandler(error => {
-                tableBody.innerHTML = '';
-                showAlert("Failed to load attendance history.", "danger");
-            }).getUserAttendanceHistory(userId);
-        }
-
         document.addEventListener("mousemove", resetSessionTimeout);
         document.addEventListener("keypress", resetSessionTimeout);
     </script>
 </body>
-
-</html>
