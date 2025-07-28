@@ -1,9 +1,10 @@
 // Constants
 const SHEET_ID = "12w9PFhq714IP0j0KuZkPsn6tNejCfusSCm1c6L7aXOo"; // Replace with your actual Sheet ID
-const OFFICE_LOCATION = { latitude: 23.74156709853675, longitude: 90.37681476839134 }; 
+const OFFICE_LOCATION = { latitude: 23.741383599749824, longitude: 90.37679524500614 }; 
 const GEOFENCE_RADIUS = 1800; // Meters
 const DATE_FORMAT = "yyyy-MM-dd";
 const TIME_FORMAT = "hh:mm a"; // AM/PM format for both check-in and check-out
+
 
 function doGet() {
     return HtmlService.createHtmlOutputFromFile("index")
