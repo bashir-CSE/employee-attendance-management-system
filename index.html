@@ -647,9 +647,14 @@
             toggleSpinner(button, true);
             google.script.run.withSuccessHandler(response => {
                 toggleSpinner(button, false);
-                showAlert(response.message, response.success ? "success" : "danger");
-                if (response.success || response.message.includes("Redirecting to login")) {
-                    setTimeout(() => showPage("loginPage"), 1500);
+                if (response.success) {
+                    showAlert(response.message + " Redirecting to login...", "success");
+                    setTimeout(() => showPage("loginPage"), 2000);
+                } else {
+                    showAlert(response.message, "danger");
+                    if (response.message.includes("Redirecting to login")) {
+                        setTimeout(() => showPage("loginPage"), 2000);
+                    }
                 }
             }).withFailureHandler(error => {
                 toggleSpinner(button, false);

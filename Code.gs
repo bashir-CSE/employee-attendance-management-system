@@ -80,6 +80,24 @@ function getSheet(sheetName) {
 }
 
 /**
+ * Centralized error handler
+ */
+function handleError(error, functionName) {
+    Logger.log(`Error in ${functionName}: ${error.message}`);
+    Logger.log(`Stack: ${error.stack}`);
+    
+    let userMessage = "An unexpected error occurred. Please try again later.";
+    
+    if (error.message.includes("Unable to access the database") || error.message.includes("not found")) {
+        userMessage = "Database connection error. Please contact support.";
+    } else if (error.message.includes("Invalid MGT-ID or password")) {
+        userMessage = "Invalid MGT-ID or password.";
+    }
+    
+    return { success: false, message: userMessage };
+}
+
+/**
  * Validate sheet structure and configuration
  */
 function validateSystemConfiguration() {
@@ -154,24 +172,21 @@ function registerUser(mgtId, name, email, password) {
             return { success: false, message: "Invalid email format." };
         }
 
-        const data = sheet.getDataRange().getValues();
-        for (let i = 1; i < data.length; i++) {
-            if (String(data[i][0]).trim() === String(mgtId).trim()) {
-                return { success: false, message: "MGT-ID already registered. Redirecting to login..." };
-            }
-            if (String(data[i][2]).trim() === String(email).trim()) {
-                return { success: false, message: "Email already registered. Please login." };
-            }
+        // Use TextFinder for efficient searching
+        const mgtIdFinder = sheet.createTextFinder(mgtId).matchEntireCell(true).findNext();
+        if (mgtIdFinder) {
+            return { success: false, message: "MGT-ID already registered. Redirecting to login..." };
+        }
+
+        const emailFinder = sheet.createTextFinder(email).matchEntireCell(true).findNext();
+        if (emailFinder) {
+            return { success: false, message: "Email already registered. Please login." };
         }
 
         sheet.appendRow([mgtId, name, email, password, new Date()]);
         return { success: true, message: "Registration successful! Please login." };
     } catch (error) {
-        Logger.log("Registration error: " + error.message);
-        if (error.message.includes("not found")) {
-            return { success: false, message: "Database connection error. Please contact support." };
-        }
-        return { success: false, message: "Registration failed: " + error.message };
+        return handleError(error, "registerUser");
     }
 }
 
@@ -189,38 +204,34 @@ function getEmployeeData() {
         }
         return employees;
     } catch (error) {
-        Logger.log("getEmployeeData error: " + error.message);
-        // Return an empty array or an error object to the client
-        return []; 
+        return handleError(error, "getEmployeeData");
     }
 }
 
 function getTodaysAttendanceStatus(mgtId) {
     try {
         const sheet = getSheet(SHEET_NAMES.ATTENDANCE);
-
         const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), DATE_FORMAT);
-        const data = sheet.getDataRange().getValues();
 
-        // Search from the end to find the last record for the user for today
-        for (let i = data.length - 1; i >= 1; i--) {
-            const rowMgtId = String(data[i][0]).trim().toUpperCase();
-            let sheetDate = String(data[i][1]).trim();
-
-            // Normalize date format if necessary
+        const mgtIdFinder = sheet.createTextFinder(mgtId).matchEntireCell(true).findAll();
+        for (let i = mgtIdFinder.length - 1; i >= 0; i--) {
+            const cell = mgtIdFinder[i];
+            const row = cell.getRow();
+            let sheetDate = String(sheet.getRange(row, 2).getValue()).trim();
             if (sheetDate && !sheetDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 try {
                     const parsedDate = new Date(sheetDate);
                     sheetDate = Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), DATE_FORMAT);
                 } catch (e) {
-                    continue; // Skip rows with unparseable dates
+                    Logger.log(`Failed to parse date '${sheetDate}' at row ${row}`);
+                    continue;
                 }
             }
 
-            if (rowMgtId === String(mgtId).trim().toUpperCase() && sheetDate === today) {
-                const checkIn = String(data[i][2]).trim();
-                const checkOut = String(data[i][3]).trim();
-                const status = String(data[i][4]).trim();
+            if (sheetDate === today) {
+                const checkIn = String(sheet.getRange(row, 3).getValue()).trim();
+                const checkOut = String(sheet.getRange(row, 4).getValue()).trim();
+                const status = String(sheet.getRange(row, 5).getValue()).trim();
 
                 if (status === "Absent") {
                     return "absent";
@@ -244,21 +255,19 @@ function loginUser(mgtId, password) {
     try {
         const sheet = getSheet(SHEET_NAMES.USERS);
 
-        const data = sheet.getDataRange().getValues();
-        for (let i = 1; i < data.length; i++) {
-            const storedMgtId = String(data[i][0]).trim();
-            const storedPassword = String(data[i][3]).trim();
-            if (storedMgtId === String(mgtId).trim() && storedPassword === String(password).trim()) {
-                return { success: true, userId: storedMgtId, name: data[i][1] };
+        const mgtIdFinder = sheet.createTextFinder(mgtId).matchEntireCell(true).findNext();
+
+        if (mgtIdFinder) {
+            const row = mgtIdFinder.getRow();
+            const storedPassword = sheet.getRange(row, 4).getValue();
+            if (String(storedPassword).trim() === String(password).trim()) {
+                const name = sheet.getRange(row, 2).getValue();
+                return { success: true, userId: mgtId, name: name };
             }
         }
         return { success: false, message: "Invalid MGT-ID or password." };
     } catch (error) {
-        Logger.log("Login error: " + error.message);
-        if (error.message.includes("not found")) {
-            return { success: false, message: "Database connection error. Please contact support." };
-        }
-        return { success: false, message: "Login failed: " + error.message };
+        return handleError(error, "loginUser");
     }
 }
 
@@ -281,20 +290,23 @@ function recordAttendance(mgtId, type, userLat, userLon) {
         const data = sheet.getDataRange().getValues();
         let targetRow = null;
 
-        // Normalize and find the row for today
-        for (let i = data.length - 1; i >= 1; i--) {
-            let sheetDate = String(data[i][1]).trim();
+        // Find the row for today using TextFinder for the MGT-ID and then checking the date
+        const mgtIdFinder = sheet.createTextFinder(mgtId).matchEntireCell(true).findAll();
+        for (let i = mgtIdFinder.length - 1; i >= 0; i--) {
+            const cell = mgtIdFinder[i];
+            const row = cell.getRow();
+            let sheetDate = String(sheet.getRange(row, 2).getValue()).trim();
             if (sheetDate && !sheetDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 try {
                     const parsedDate = new Date(sheetDate);
                     sheetDate = Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), DATE_FORMAT);
                 } catch (e) {
-                    Logger.log(`Failed to parse date '${sheetDate}' at row ${i + 1}`);
+                    Logger.log(`Failed to parse date '${sheetDate}' at row ${row}`);
                     continue;
                 }
             }
-            if (String(data[i][0]).trim() === String(mgtId).trim() && sheetDate === today) {
-                targetRow = i + 1;
+            if (sheetDate === today) {
+                targetRow = row;
                 break;
             }
         }
@@ -349,11 +361,7 @@ function recordAttendance(mgtId, type, userLat, userLon) {
             return { success: false, message: "Invalid attendance type." };
         }
     } catch (error) {
-        Logger.log("Attendance error: " + error.message);
-        if (error.message.includes("not found")) {
-            return { success: false, message: "Database connection error. Please contact support." };
-        }
-        return { success: false, message: "Attendance recording failed: " + error.message };
+        return handleError(error, "recordAttendance");
     }
 }
 
@@ -378,21 +386,17 @@ function resetPassword(mgtId, newPassword) {
 
         const sheet = getSheet(SHEET_NAMES.USERS);
         
-        const data = sheet.getDataRange().getValues();
-        for (let i = 1; i < data.length; i++) {
-            if (String(data[i][0]).trim() === String(mgtId).trim()) {
-                sheet.getRange(i + 1, 4).setValue(newPassword);
-                return { success: true, message: "Password reset successfully! Please login." };
-            }
+        const mgtIdFinder = sheet.createTextFinder(mgtId).matchEntireCell(true).findNext();
+
+        if (mgtIdFinder) {
+            const row = mgtIdFinder.getRow();
+            sheet.getRange(row, 4).setValue(newPassword);
+            return { success: true, message: "Password reset successfully! Please login." };
         }
         
         return { success: false, message: "MGT-ID not found." };
     } catch (error) {
-        Logger.log("Reset password error: " + error.message);
-        if (error.message.includes("not found")) {
-            return { success: false, message: "Database connection error. Please contact support." };
-        }
-        return { success: false, message: "Password reset failed: " + error.message };
+        return handleError(error, "resetPassword");
     }
 }
 
@@ -426,129 +430,37 @@ function getAttendanceHistory(mgtId, startDate = null, endDate = null) {
         }
 
         const sheet = getSheet(SHEET_NAMES.ATTENDANCE);
-
-        const lastRow = sheet.getLastRow();
-        if (lastRow <= 1) {
-            Logger.log("No data rows found in attendance sheet.");
-            return { success: true, history: [] };
-        }
-
         const history = [];
         const normalizedMgtId = String(mgtId).trim().toUpperCase();
-        Logger.log("Scanning " + lastRow + " rows for MGT-ID: " + normalizedMgtId);
 
-        // Get all data at once for better performance
-        const allData = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
-        
-        // Process data from newest to oldest (reverse order)
-        for (let i = allData.length - 1; i >= 0; i--) {
-            const rowData = allData[i];
-            const rowMgtId = String(rowData[0] || "").trim().toUpperCase();
+        const data = sheet.getDataRange().getValues();
+        const mgtIdCol = 0; 
+        const dateCol = 1;
+        const checkInCol = 2;
+        const checkOutCol = 3;
+        const statusCol = 4;
 
-            if (rowMgtId === normalizedMgtId) {
-                let dateCell = rowData[1];
-                let formattedDate = "-";
+        for (let i = data.length - 1; i >= 1; i--) {
+            if (String(data[i][mgtIdCol]).trim().toUpperCase() === normalizedMgtId) {
                 let recordDate = null;
-                
-                // Handle date formatting more robustly
-                if (dateCell) {
-                    try {
-                        if (dateCell instanceof Date) {
-                            recordDate = dateCell;
-                            formattedDate = Utilities.formatDate(dateCell, Session.getScriptTimeZone(), "dd-MM-yyyy");
-                        } else if (typeof dateCell === 'string' && dateCell.trim() !== "") {
-                            // Try to parse string date
-                            const parsedDate = new Date(dateCell);
-                            if (!isNaN(parsedDate.getTime())) {
-                                recordDate = parsedDate;
-                                formattedDate = Utilities.formatDate(parsedDate, Session.getScriptTimeZone(), "dd-MM-yyyy");
-                            } else {
-                                formattedDate = String(dateCell).trim();
-                            }
-                        } else {
-                            formattedDate = String(dateCell).trim();
-                        }
-                    } catch (e) {
-                        Logger.log(`Error formatting date for row ${i + 2}: ${e.message}`);
-                        formattedDate = String(dateCell).trim();
-                    }
+                try {
+                    recordDate = new Date(data[i][dateCol]);
+                } catch (e) {
+                    continue;
                 }
 
-                // Apply date range filter if specified
-                if (filterStartDate && filterEndDate && recordDate) {
+                if (filterStartDate && filterEndDate) {
                     if (recordDate < filterStartDate || recordDate > filterEndDate) {
-                        continue; // Skip this record if it's outside the date range
+                        continue;
                     }
-                }
-
-                // Format check-in and check-out times
-                let checkInTime = "-";
-                let checkOutTime = "-";
-                let status = rowData[4] ? String(rowData[4]).trim() : "-";
-
-                // Handle check-in time formatting
-                if (rowData[2]) {
-                    try {
-                        if (rowData[2] instanceof Date) {
-                            checkInTime = Utilities.formatDate(rowData[2], Session.getScriptTimeZone(), TIME_FORMAT);
-                        } else if (typeof rowData[2] === 'string' && rowData[2].trim() !== "" && rowData[2].trim() !== "-") {
-                            // Try to parse as date if it's a string
-                            const parsedTime = new Date(rowData[2]);
-                            if (!isNaN(parsedTime.getTime())) {
-                                checkInTime = Utilities.formatDate(parsedTime, Session.getScriptTimeZone(), TIME_FORMAT);
-                            } else {
-                                checkInTime = String(rowData[2]).trim();
-                            }
-                        } else {
-                            checkInTime = String(rowData[2]).trim();
-                        }
-                    } catch (e) {
-                        Logger.log(`Error formatting check-in time for row ${i + 2}: ${e.message}`);
-                        checkInTime = String(rowData[2]).trim();
-                    }
-                }
-
-                // Handle check-out time formatting
-                if (rowData[3]) {
-                    try {
-                        if (rowData[3] instanceof Date) {
-                            checkOutTime = Utilities.formatDate(rowData[3], Session.getScriptTimeZone(), TIME_FORMAT);
-                        } else if (typeof rowData[3] === 'string' && rowData[3].trim() !== "" && rowData[3].trim() !== "-") {
-                            // Try to parse as date if it's a string
-                            const parsedTime = new Date(rowData[3]);
-                            if (!isNaN(parsedTime.getTime())) {
-                                checkOutTime = Utilities.formatDate(parsedTime, Session.getScriptTimeZone(), TIME_FORMAT);
-                            } else {
-                                checkOutTime = String(rowData[3]).trim();
-                            }
-                        } else {
-                            checkOutTime = String(rowData[3]).trim();
-                        }
-                    } catch (e) {
-                        Logger.log(`Error formatting check-out time for row ${i + 2}: ${e.message}`);
-                        checkOutTime = String(rowData[3]).trim();
-                    }
-                }
-
-                // Handle empty values
-                if (checkInTime === "" || checkInTime === "undefined" || checkInTime === "null") {
-                    checkInTime = "-";
-                }
-                if (checkOutTime === "" || checkOutTime === "undefined" || checkOutTime === "null") {
-                    checkOutTime = "-";
-                }
-                if (status === "" || status === "undefined" || status === "null") {
-                    status = "-";
                 }
 
                 history.push({
-                    date: formattedDate,
-                    checkIn: checkInTime,
-                    checkOut: checkOutTime,
-                    status: status
+                    date: Utilities.formatDate(recordDate, Session.getScriptTimeZone(), "dd-MM-yyyy"),
+                    checkIn: data[i][checkInCol] ? Utilities.formatDate(new Date(data[i][checkInCol]), Session.getScriptTimeZone(), TIME_FORMAT) : "-",
+                    checkOut: data[i][checkOutCol] ? Utilities.formatDate(new Date(data[i][checkOutCol]), Session.getScriptTimeZone(), TIME_FORMAT) : "-",
+                    status: data[i][statusCol] || "-"
                 });
-                
-                Logger.log(`Added record: Date=${formattedDate}, CheckIn=${checkInTime}, CheckOut=${checkOutTime}, Status=${status}`);
             }
         }
         
@@ -556,8 +468,6 @@ function getAttendanceHistory(mgtId, startDate = null, endDate = null) {
         return { success: true, history: history };
         
     } catch (error) {
-        Logger.log("CRITICAL ERROR in getAttendanceHistory: " + error.toString());
-        Logger.log("Error stack: " + error.stack);
-        return { success: false, message: "Failed to retrieve attendance history. Error: " + error.message };
+        return handleError(error, "getAttendanceHistory");
     }
 }
