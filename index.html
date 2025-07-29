@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Attendance Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
@@ -214,6 +213,33 @@
         .autocomplete-container {
             position: relative;
         }
+
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                padding-top: 1rem;
+            }
+
+            .navbar-nav .nav-item {
+                margin-bottom: 0.5rem;
+            }
+
+            .navbar-nav .nav-item:last-child {
+                margin-bottom: 0;
+            }
+
+            .navbar-nav .nav-link.btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .history-table {
+            font-size: 0.9rem;
+        }
+
+        .history-table th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 
@@ -223,7 +249,7 @@
             <a class="navbar-brand" href="#" aria-label="Aloha Bangladesh Employee Attendance System">
                 <img src="https://www.alohabdonline.com/wp-content/uploads/2020/04/ALOHA-Logo-800-px-X-180-px.png"
                     class="img-fluid me-2" style="max-height: 40px;" alt="Aloha Bangladesh Logo">
-                Employee Attendance System
+                <span class="d-none d-sm-inline">Employee Attendance System</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -258,23 +284,23 @@
                     <div class="form-floating mb-3 autocomplete-container">
                         <input type="text" class="form-control" id="loginMgtId" list="mgtIdList" required
                             placeholder=" ">
-                        <label for="loginMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                        <label for="loginMgtId"><i class="fas fa-user me-2"></i>MGT-ID</label>
                     </div>
                     <div class="form-floating position-relative mb-3">
                         <input type="password" class="form-control" id="loginPassword" placeholder="Password"
                             pattern="\d{4}" required aria-describedby="passwordValidation">
-                        <label for="loginPassword"><i class="bi bi-lock-fill me-2"></i>Password (4 digits)</label>
+                        <label for="loginPassword"><i class="fas fa-lock me-2"></i>Password (4 digits)</label>
                         <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
                             onclick="togglePassword('loginPassword', 'loginEyeIcon')"
                             aria-label="Toggle password visibility" aria-controls="loginPassword">
-                            <i id="loginEyeIcon" class="bi bi-eye-fill"></i>
+                            <i id="loginEyeIcon" class="fas fa-eye"></i>
                         </button>
                     </div>
                     <div id="passwordValidation" class="small text-muted mb-3">
                         Password must be 4 digits (numbers only)
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Login to your account">
-                        <span class="btn-content"><i class="bi bi-box-arrow-in-right me-2"></i>Login</span>
+                        <span class="btn-content"><i class="fas fa-sign-in-alt me-2"></i>Login</span>
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </form>
@@ -292,33 +318,33 @@
                 <form onsubmit="handleRegistration(event)" novalidate>
                     <div class="form-floating mb-3 autocomplete-container">
                         <input type="text" class="form-control" id="mgtId" list="mgtIdList" required placeholder=" ">
-                        <label for="mgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                        <label for="mgtId"><i class="fas fa-user me-2"></i>MGT-ID</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="name" placeholder="Name" required
                             aria-label="Enter your name">
-                        <label for="name"><i class="bi bi-person-lines-fill me-2"></i>Name</label>
+                        <label for="name"><i class="fas fa-id-card me-2"></i>Name</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="email" class="form-control" id="email" placeholder="Email" required
                             aria-label="Enter your email">
-                        <label for="email"><i class="bi bi-envelope-fill me-2"></i>Email</label>
+                        <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
                     </div>
                     <div class="form-floating position-relative mb-3">
                         <input type="password" class="form-control" id="password" placeholder="Password" pattern="\d{4}"
                             required aria-describedby="regPasswordValidation">
-                        <label for="password"><i class="bi bi-lock-fill me-2"></i>Password (4 digits)</label>
+                        <label for="password"><i class="fas fa-lock me-2"></i>Password (4 digits)</label>
                         <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
                             onclick="togglePassword('password', 'regEyeIcon')" aria-label="Toggle password visibility"
                             aria-controls="password">
-                            <i id="regEyeIcon" class="bi bi-eye-fill"></i>
+                            <i id="regEyeIcon" class="fas fa-eye"></i>
                         </button>
                     </div>
                     <div id="regPasswordValidation" class="small text-muted mb-3">
                         Password must be 4 digits (numbers only)
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Register a new account">
-                        <span class="btn-content"><i class="bi bi-person-plus-fill me-2"></i>Register</span>
+                        <span class="btn-content"><i class="fas fa-user-plus me-2"></i>Register</span>
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </form>
@@ -335,23 +361,23 @@
                     <div class="form-floating mb-3 autocomplete-container">
                         <input type="text" class="form-control" id="forgotMgtId" list="mgtIdList" required
                             placeholder=" ">
-                        <label for="forgotMgtId"><i class="bi bi-person-fill me-2"></i>MGT-ID</label>
+                        <label for="forgotMgtId"><i class="fas fa-user me-2"></i>MGT-ID</label>
                     </div>
                     <div class="form-floating position-relative mb-3">
                         <input type="password" class="form-control" id="newPassword" placeholder="New Password"
                             pattern="\d{4}" required aria-describedby="resetPasswordValidation">
-                        <label for="newPassword"><i class="bi bi-lock-fill me-2"></i>New Password (4 digits)</label>
+                        <label for="newPassword"><i class="fas fa-lock me-2"></i>New Password (4 digits)</label>
                         <button type="button" class="btn position-absolute top-50 end-0 translate-middle-y me-3"
                             onclick="togglePassword('newPassword', 'resetEyeIcon')"
                             aria-label="Toggle password visibility" aria-controls="newPassword">
-                            <i id="resetEyeIcon" class="bi bi-eye-fill"></i>
+                            <i id="resetEyeIcon" class="fas fa-eye"></i>
                         </button>
                     </div>
                     <div id="resetPasswordValidation" class="small text-muted mb-3">
                         Password must be 4 digits (numbers only)
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-3" aria-label="Reset your password">
-                        <span class="btn-content"><i class="bi bi-arrow-repeat me-2"></i>Reset Password</span>
+                        <span class="btn-content"><i class="fas fa-sync-alt me-2"></i>Reset Password</span>
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     </button>
                 </form>
@@ -372,7 +398,7 @@
                         <div class="attendance-card" id="checkInCard" role="button"
                             onclick="submitAttendance('check-in')" aria-label="Record check-in attendance" tabindex="0">
                             <div class="card-content">
-                                <i class="bi bi-box-arrow-in-right"></i>
+                                <i class="fa-solid fa-door-open"></i>
                                 <h5>Check-In</h5>
                                 <p>Start your workday</p>
                             </div>
@@ -384,7 +410,7 @@
                             onclick="submitAttendance('check-out')" aria-label="Record check-out attendance"
                             tabindex="0">
                             <div class="card-content">
-                                <i class="bi bi-box-arrow-right"></i>
+                                <i class="fa-solid fa-door-closed"></i>
                                 <h5>Check-Out</h5>
                                 <p>End your workday</p>
                             </div>
@@ -395,7 +421,7 @@
                         <div class="attendance-card" id="absentCard" role="button" onclick="submitAttendance('absent')"
                             aria-label="Mark as absent" tabindex="0">
                             <div class="card-content">
-                                <i class="bi bi-x-circle"></i>
+                                <i class="fas fa-times-circle"></i>
                                 <h5>Absent</h5>
                                 <p>Mark as absent</p>
                             </div>
@@ -405,8 +431,83 @@
                 </div>
                 <div class="text-center mt-4 d-flex justify-content-center gap-2">
                     <button class="btn logout-btn text-white" onclick="logout()" aria-label="Log out of your account">
-                        <i class="bi bi-power me-2"></i>Logout
+                        <i class="fas fa-power-off me-2"></i>Logout
                     </button>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h4 class="text-center mb-3">Attendance History</h4>
+
+                <!-- Date Range Filter -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card"
+                            style="border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;">
+                            <div class="card-body p-4">
+                                <h6 class="card-title mb-4"
+                                    style="color: #495057; font-weight: 600; display: flex; align-items: center;">
+                                    <i class="fas fa-filter" style="color: #0d6efd; margin-right: 0.5rem;"></i>Filter by
+                                    Date Range
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="startDate" class="form-label fw-semibold"
+                                            style="font-weight: 600 !important;">Start Date</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"
+                                                style="background-color: white !important;">
+                                                <i class="fas fa-calendar-alt" style="color: #0d6efd;"></i>
+                                            </span>
+                                            <input type="date" class="form-control" id="startDate"
+                                                aria-label="Select start date"
+                                                style="border-radius: 8px; border: 1px solid #dee2e6;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="endDate" class="form-label fw-semibold"
+                                            style="font-weight: 600 !important;">End Date</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"
+                                                style="background-color: white !important;">
+                                                <i class="fas fa-calendar-alt" style="color: #0d6efd;"></i>
+                                            </span>
+                                            <input type="date" class="form-control" id="endDate"
+                                                aria-label="Select end date"
+                                                style="border-radius: 8px; border: 1px solid #dee2e6;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary me-2" onclick="applyDateFilter()"
+                                            aria-label="Apply date filter"
+                                            style="background-color: #0d6efd; border-color: #0d6efd; border-radius: 8px; padding: 0.5rem 1.25rem;">
+                                            <i class="fas fa-search me-1"></i>Filter
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            onclick="clearDateFilter()" aria-label="Clear date filter"
+                                            style="border-radius: 8px; padding: 0.5rem 1.25rem;">
+                                            <i class="fas fa-times me-1"></i>Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceHistoryBody">
+                            <!-- History will be populated here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -419,7 +520,7 @@
                 <p class="mb-1 fs-6">Developed by <b class="text-white">Md Bashir Ahmed &#129505;</b>, Officer-IT</p>
                 <p class="mb-0 fs-6">ALOHA Bangladesh</p>
             </div>
-    
+
             <div>
                 <p class="mb-0">
                     <a href="https://www.linkedin.com/in/bashir-6923131b0/" target="_blank"
@@ -451,8 +552,8 @@
             const icon = document.getElementById(iconId);
             const isVisible = input.type === "password";
             input.type = isVisible ? "text" : "password";
-            icon.classList.toggle("bi-eye-fill", isVisible);
-            icon.classList.toggle("bi-eye-slash-fill", !isVisible);
+            icon.classList.toggle("fa-eye", isVisible);
+            icon.classList.toggle("fa-eye-slash", !isVisible);
         }
 
         function showAlert(message, type) {
@@ -460,7 +561,7 @@
             alert.className = `alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInDown`;
             alert.role = "alert";
             alert.innerHTML = `
-                <i class="bi ${type === "success" ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill"} me-2"></i>
+                <i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-triangle"} me-2"></i>
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
@@ -583,6 +684,7 @@
                     showAlert("Logged in successfully!", "success");
                     updateAttendanceUI(response.userId);
                     showPage("userDashboard");
+                    loadAttendanceHistory(response.userId);
                     resetSessionTimeout();
                 } else {
                     showAlert(response.message, "danger");
@@ -648,6 +750,8 @@
                         if (response.success) {
                             showAlert(response.message, "success");
                             updateAttendanceUI(currentUser.userId);
+                            // Refresh attendance history after successful attendance recording
+                            loadAttendanceHistory(currentUser.userId);
                         } else {
                             showAlert(response.message, "danger");
                             if (response.message.includes("check-in")) {
@@ -702,6 +806,117 @@
                         break;
                 }
             }).getTodaysAttendanceStatus(mgtId);
+        }
+
+        function loadAttendanceHistory(mgtId, startDate = null, endDate = null) {
+            console.log("Loading attendance history for MGT-ID:", mgtId);
+            if (startDate && endDate) {
+                console.log("Date range filter:", startDate, "to", endDate);
+            }
+
+            // Validate MGT-ID before making the call
+            if (!mgtId || String(mgtId).trim() === "") {
+                console.error("Invalid MGT-ID provided to loadAttendanceHistory:", mgtId);
+                showAlert("Invalid user ID. Please log in again.", "danger");
+                return;
+            }
+
+            // Show loading indicator
+            const historyBody = document.getElementById("attendanceHistoryBody");
+            historyBody.innerHTML = '<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading attendance history...</td></tr>';
+
+            google.script.run.withSuccessHandler(response => {
+                console.log("Response from getAttendanceHistory:", response);
+
+                if (response && response.success) {
+                    historyBody.innerHTML = ""; // Clear loading indicator
+
+                    if (response.history && response.history.length > 0) {
+                        console.log("History data received:", response.history.length, "records");
+
+                        response.history.forEach((record, index) => {
+                            // Validate record data
+                            const date = record.date || "-";
+                            const checkIn = record.checkIn || "-";
+                            const checkOut = record.checkOut || "-";
+                            const status = record.status || "-";
+
+                            // Add status badge styling
+                            let statusClass = "";
+                            let statusText = status;
+                            if (status.toLowerCase() === "present") {
+                                statusClass = "badge bg-success";
+                            } else if (status.toLowerCase() === "absent") {
+                                statusClass = "badge bg-danger";
+                            } else {
+                                statusClass = "badge bg-secondary";
+                            }
+
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${date}</td>
+                                <td>${checkIn}</td>
+                                <td>${checkOut}</td>
+                                <td><span class="${statusClass}">${statusText}</span></td>
+                            `;
+                            historyBody.appendChild(row);
+                        });
+
+                        console.log("Successfully loaded", response.history.length, "attendance records");
+                    } else {
+                        console.log("No history found for this user.");
+                        const message = startDate && endDate ?
+                            'No attendance records found for the selected date range.' :
+                            'No attendance history found.';
+                        historyBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted"><i class="fas fa-info-circle"></i> ${message}</td></tr>`;
+                    }
+                } else {
+                    console.error("Failed to load history:", response ? response.message : "Unknown error");
+                    historyBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> Failed to load history.</td></tr>';
+                    showAlert(response ? response.message : "Failed to load attendance history.", "danger");
+                }
+            }).withFailureHandler(error => {
+                console.error("Error calling getAttendanceHistory:", error);
+                historyBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading history.</td></tr>';
+                showAlert(error.message || "Network error. Failed to load attendance history.", "danger");
+            }).getAttendanceHistory(String(mgtId).trim(), startDate, endDate);
+        }
+
+        function applyDateFilter() {
+            if (!currentUser) {
+                showAlert("Please log in first.", "danger");
+                return;
+            }
+
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+
+            if (!startDate || !endDate) {
+                showAlert("Please select both start and end dates.", "warning");
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showAlert("Start date cannot be later than end date.", "warning");
+                return;
+            }
+
+            console.log("Applying date filter:", startDate, "to", endDate);
+            loadAttendanceHistory(currentUser.userId, startDate, endDate);
+        }
+
+        function clearDateFilter() {
+            if (!currentUser) {
+                showAlert("Please log in first.", "danger");
+                return;
+            }
+
+            // Clear the date inputs
+            document.getElementById("startDate").value = "";
+            document.getElementById("endDate").value = "";
+
+            console.log("Clearing date filter");
+            loadAttendanceHistory(currentUser.userId);
         }
 
         function logout() {
@@ -760,6 +975,7 @@
                 document.getElementById("userId").textContent = user.userId;
                 showPage("userDashboard");
                 updateAttendanceUI(user.userId);
+                loadAttendanceHistory(user.userId);
                 resetSessionTimeout();
             } else {
                 console.log("window.onload: No user found in sessionStorage. Showing login page."); // Added log
@@ -790,3 +1006,5 @@
         document.addEventListener("keypress", resetSessionTimeout);
     </script>
 </body>
+
+</html>

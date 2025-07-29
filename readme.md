@@ -1,70 +1,246 @@
 # Employee Attendance Management System
 
-This is a web-based employee attendance management system built with Google Apps Script. It allows employees to register, log in, and record their attendance (check-in, check-out, or absent) using a simple web interface. The system uses a Google Sheet as a database and includes features like geofencing to ensure employees are within a specified radius of the office when they check in or out.
+A comprehensive web-based employee attendance management system built with Google Apps Script and modern web technologies. This system provides secure user authentication, location-based attendance tracking, and comprehensive attendance history management.
 
-## Features
+## 🚀 Features
 
-- **User Authentication:** Employees can register with their MGT-ID, name, email, and a 4-digit password. The system validates user credentials for login.
-- **Password Management:** Users can reset their password if they forget it.
-- **Attendance Tracking:** Employees can check in, check out, or mark themselves as absent for the day.
-- **Geofencing:** The system verifies the employee's location using their browser's geolocation API and ensures they are within a predefined radius of the office before allowing them to check in or out.
-- **Session Management:** The system automatically logs out users after a period of inactivity.
-- **Dynamic UI:** The user interface is built with HTML, CSS, and JavaScript, and it dynamically updates based on the user's attendance status.
-- **Google Sheets Integration:** The application uses a Google Sheet to store user data and attendance records.
+### Core Functionality
+- **User Registration & Authentication**: Secure login system with 4-digit PIN
+- **Real-time Attendance Tracking**: Check-in, check-out, and absent marking
+- **Geofence Validation**: Location-based attendance verification
+- **Attendance History**: Complete historical records with status tracking
+- **Password Reset**: Self-service password reset functionality
+- **Auto-complete**: Smart MGT-ID suggestions during login/registration
 
-## How It Works
+### Technical Features
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Real-time Updates**: Instant UI updates after attendance actions
+- **Session Management**: Automatic session timeout for security
+- **Error Handling**: Comprehensive error handling and user feedback
+- **Loading Indicators**: Visual feedback during operations
+- **Configurable Variables**: Easy configuration for sheet names and settings
 
-### Backend (`Code.gs`)
+## 📋 Prerequisites
 
-The backend is a Google Apps Script that handles all the core logic of the application.
+- Google account with access to Google Sheets and Google Apps Script
+- Modern web browser with JavaScript enabled
+- Location services enabled for geofence validation
 
-- **`doGet()`:** Serves the `index.html` file as the web application's user interface.
-- **`registerUser(mgtId, name, email, password)`:** Registers a new user by adding their details to the "Users" sheet in the Google Sheet. It performs validation to ensure the MGT-ID and email are unique and that the password meets the required format.
-- **`getEmployeeData()`:** Fetches a list of employees from the "Employee data" sheet to populate a datalist in the registration and login forms.
-- **`getTodaysAttendanceStatus(mgtId)`:** Checks the "Attendance" sheet to determine the user's attendance status for the current day.
-- **`loginUser(mgtId, password)`:** Authenticates a user by verifying their MGT-ID and password against the records in the "Users" sheet.
-- **`recordAttendance(mgtId, type, userLat, userLon)`:** Records the user's attendance. It first checks if the user is within the geofence radius and then updates the "Attendance" sheet with the check-in, check-out, or absent status.
-- **`calculateDistance(lat1, lon1, lat2, lon2)`:** A helper function to calculate the distance between two geographical coordinates.
-- **`resetPassword(mgtId, newPassword)`:** Resets a user's password in the "Users" sheet.
+## 🛠️ Setup Instructions
 
-### Frontend (`index.html`)
+### Step 1: Create Google Spreadsheet
 
-The frontend is a single HTML file that includes the UI and client-side logic.
+1. Create a new Google Spreadsheet
+2. Create the following sheets with exact names:
 
-- **Pages:** The application is structured into several "pages" (login, registration, forgot password, and dashboard), which are shown or hidden dynamically.
-- **Forms:** It includes forms for user registration, login, and password reset. The forms have client-side validation to ensure the data is in the correct format.
-- **Dashboard:** After logging in, the user is taken to a dashboard where they can see their name and MGT-ID and record their attendance.
-- **Client-Side Logic:** The JavaScript code in the `index.html` file handles user interactions, communicates with the Google Apps Script backend using `google.script.run`, and updates the UI based on the responses from the backend.
+#### Sheet: "Users"
+| Column A | Column B | Column C | Column D | Column E |
+|----------|----------|----------|----------|----------|
+| MGT-ID   | Name     | Email    | Password | Registration Date |
 
-## Setup and Deployment
+#### Sheet: "Attendance"
+| Column A | Column B | Column C | Column D | Column E | Column F |
+|----------|----------|----------|----------|----------|----------|
+| MGT-ID   | Date     | Check-In | Check-Out| Status   | Timestamp |
 
-To set up and deploy this application, follow these steps:
+#### Sheet: "Employee data"
+| Column A | Column B |
+|----------|----------|
+| MGT-ID   | Name     |
 
-1.  **Create a Google Sheet:**
-    *   Create a new Google Sheet.
-    *   Rename the default sheet to "Users" and add the following headers in the first row: `MGT-ID`, `Name`, `Email`, `Password`, `RegistrationDate`.
-    *   Create a new sheet named "Attendance" and add the following headers: `MGT-ID`, `Date`, `Check-in`, `Check-out`, `Status`, `Timestamp`.
-    *   Create another sheet named "Employee data" and add the headers: `MGT-ID`, `Name`. Populate this sheet with the MGT-IDs and names of all employees.
-    *   Get the ID of the Google Sheet from its URL.
+### Step 2: Configure Google Apps Script
 
-2.  **Configure the Script:**
-    *   Open the `Code.gs` file in the Google Apps Script editor.
-    *   Replace the placeholder value of `SHEET_ID` with the ID of your Google Sheet.
-    *   Optionally, you can also customize the `OFFICE_LOCATION` and `GEOFENCE_RADIUS` constants to match your office's location and desired geofence radius.
+1. Open Google Apps Script (script.google.com)
+2. Create a new project
+3. Replace the default code with the contents of `Code.gs`
+4. Update the configuration section:
 
-3.  **Deploy the Web App:**
-    *   In the Google Apps Script editor, go to `Deploy` > `New deployment`.
-    *   Select `Web app` as the deployment type.
-    *   In the "Execute as" dropdown, select "Me".
-    *   In the "Who has access" dropdown, select "Anyone with Google account" or "Anyone" depending on your needs.
-    *   Click `Deploy`.
-    *   Copy the web app URL provided after deployment. This is the URL you will use to access the application.
+```javascript
+// Update this with your Google Spreadsheet ID
+const SHEET_ID = "YOUR_SPREADSHEET_ID_HERE";
 
-## Usage
+// Update with your office coordinates
+const OFFICE_LOCATION = { 
+  latitude: YOUR_OFFICE_LATITUDE,   
+  longitude: YOUR_OFFICE_LONGITUDE    
+}; 
 
-1.  Open the web app URL in a browser.
-2.  If you are a new user, click the "Register" link to create a new account.
-3.  Log in with your MGT-ID and password.
-4.  On the dashboard, click the "Check-In", "Check-Out", or "Absent" button to record your attendance.
-5.  The system will ask for your location to verify that you are at the office.
-6.  Your attendance will be recorded in the Google Sheet.
+// Adjust geofence radius as needed (in meters)
+const GEOFENCE_RADIUS = 1800;
+```
+
+### Step 3: Add HTML File
+
+1. In Apps Script, click the "+" button next to "Files"
+2. Select "HTML"
+3. Name it "index"
+4. Replace the content with the contents of `index.html`
+
+### Step 4: Deploy as Web App
+
+1. Click "Deploy" → "New deployment"
+2. Choose type: "Web app"
+3. Set execute as: "Me"
+4. Set access: "Anyone" (or "Anyone with Google account" for more security)
+5. Click "Deploy"
+6. Copy the web app URL
+
+### Step 5: Test the System
+
+1. Run the `initializeSystem()` function in Apps Script to validate configuration
+2. Access the web app URL
+3. Register a test user
+4. Test login and attendance functionality
+
+## 🔧 Configuration Options
+
+### Sheet Names
+If you need to use different sheet names, update the `SHEET_NAMES` object in `Code.gs`:
+
+```javascript
+const SHEET_NAMES = {
+  USERS: "Your_Users_Sheet_Name",
+  ATTENDANCE: "Your_Attendance_Sheet_Name", 
+  EMPLOYEE_DATA: "Your_Employee_Data_Sheet_Name"
+};
+```
+
+### Geofence Settings
+Adjust the office location and radius:
+
+```javascript
+const OFFICE_LOCATION = { 
+  latitude: 23.741383599749824,   // Your office latitude
+  longitude: 90.37679524500614    // Your office longitude
+}; 
+const GEOFENCE_RADIUS = 1800; // Radius in meters
+```
+
+### Date/Time Formats
+Customize date and time display formats:
+
+```javascript
+const DATE_FORMAT = "yyyy-MM-dd";  // Storage format
+const TIME_FORMAT = "hh:mm a";     // Display format (12-hour with AM/PM)
+```
+
+## 📱 Usage Guide
+
+### For Employees
+
+1. **Registration**:
+   - Enter your MGT-ID (must match Employee data sheet)
+   - Provide name, email, and create a 4-digit PIN
+   - Click Register
+
+2. **Login**:
+   - Select your MGT-ID from the dropdown
+   - Enter your 4-digit PIN
+   - Click Login
+
+3. **Recording Attendance**:
+   - **Check-in**: Click when arriving at office
+   - **Check-out**: Click when leaving office (requires prior check-in)
+   - **Absent**: Mark yourself absent for the day
+
+4. **View History**:
+   - Scroll down to see your complete attendance history
+   - History updates automatically after each attendance action
+
+### For Administrators
+
+1. **Employee Management**:
+   - Add employee data to "Employee data" sheet for auto-complete
+   - Monitor attendance through "Attendance" sheet
+   - View user registrations in "Users" sheet
+
+2. **System Monitoring**:
+   - Check Apps Script logs for system events
+   - Run `initializeSystem()` to validate configuration
+   - Monitor geofence violations and system errors
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+1. **"Sheet not found" errors**:
+   - Verify sheet names match exactly (case-sensitive)
+   - Check SHEET_ID is correct
+   - Ensure all required sheets exist
+
+2. **Location/Geofence issues**:
+   - Verify OFFICE_LOCATION coordinates are correct
+   - Check GEOFENCE_RADIUS is appropriate
+   - Ensure location services are enabled in browser
+
+3. **Attendance history not loading**:
+   - Check browser console for JavaScript errors
+   - Verify MGT-ID exists in attendance sheet
+   - Ensure proper date formatting in sheet
+
+4. **Login issues**:
+   - Verify user exists in Users sheet
+   - Check password is exactly 4 digits
+   - Clear browser cache and try again
+
+### System Validation
+
+Run the `initializeSystem()` function in Apps Script to check:
+- Spreadsheet accessibility
+- Required sheets existence
+- Basic sheet structure validation
+
+## 🔒 Security Features
+
+- **Session Management**: Automatic logout after 5 minutes of inactivity
+- **Input Validation**: Server-side validation of all inputs
+- **Geofence Protection**: Location-based attendance verification
+- **Error Handling**: Secure error messages without exposing system details
+
+## 📊 Data Structure
+
+### Users Sheet
+- Stores user registration information
+- Passwords are stored as plain text (4-digit PINs)
+- Registration timestamps for audit trail
+
+### Attendance Sheet
+- One record per attendance action
+- Supports multiple check-ins/check-outs per day
+- Status tracking (Present/Absent)
+- Geolocation validation logs
+
+### Employee Data Sheet
+- Master list for auto-complete functionality
+- Can be pre-populated with employee information
+- Used for MGT-ID validation during registration
+
+## 🚀 Recent Improvements
+
+### Fixed Issues
+- **Attendance History Loading**: Improved error handling and data validation
+- **Sheet Name Variables**: Centralized configuration for easy customization
+- **Data Consistency**: Better handling of date formats and empty values
+- **Error Messages**: More descriptive error messages for troubleshooting
+
+### Enhanced Features
+- **Real-time History Updates**: History refreshes automatically after attendance actions
+- **Loading Indicators**: Visual feedback during data loading
+- **Status Badges**: Color-coded status indicators in history table
+- **System Validation**: Built-in configuration validation function
+
+## 📞 Support
+
+For technical support or feature requests:
+- Check the browser console for detailed error messages
+- Review Apps Script execution logs
+- Verify all configuration settings match your setup
+- Run `initializeSystem()` function to validate system configuration
+
+## 📄 License
+
+This project is developed for internal use at ALOHA Bangladesh. Please ensure compliance with your organization's policies before deployment.
+
+---
+
+**Developed by Md Bashir Ahmed, Officer-IT, ALOHA Bangladesh**
