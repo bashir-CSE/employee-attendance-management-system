@@ -36,16 +36,46 @@
         .btn-primary {
             background-color: #007bff;
             border: none;
-            transition: background-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 0.75rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transform: translateY(0);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
         }
 
         .btn-primary:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
         }
 
         .btn-primary .spinner-border {
             margin-right: 0.5rem;
+        }
+
+        .btn-primary .btn-content {
+            position: relative;
+            z-index: 1;
         }
 
         .page {
@@ -79,12 +109,30 @@
             font-weight: 500;
             padding: 0.5rem 1rem;
             border-radius: 5px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar-nav .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
         }
 
         .navbar-nav .nav-link:hover {
             background-color: rgba(0, 123, 255, 0.1);
             color: #007bff;
+            transform: translateX(2px);
+        }
+
+        .navbar-nav .nav-link:hover::before {
+            left: 100%;
         }
 
         .navbar-nav .nav-link.btn {
@@ -94,12 +142,33 @@
             padding: 0.5rem 1rem;
             margin: 0 0.25rem;
             border-radius: 5px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar-nav .nav-link.btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .navbar-nav .nav-link.btn:hover {
             background-color: #0056b3;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .navbar-nav .nav-link.btn:active::before {
+            width: 300px;
+            height: 300px;
         }
 
         .alert-container {
@@ -114,6 +183,28 @@
 
         .form-floating {
             margin-bottom: 1rem;
+        }
+
+        .form-floating .form-control {
+            transition: all 0.3s ease;
+            border: 1px solid #ced4da;
+        }
+
+        .form-floating .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .form-floating label {
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .form-floating .form-control:focus ~ label,
+        .form-floating .form-control:not(:placeholder-shown) ~ label {
+            transform: translateY(-1.5rem) scale(0.85);
+            color: #007bff;
         }
 
         .dashboard-header {
@@ -146,16 +237,43 @@
             border-radius: 10px;
             padding: 1rem;
             text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
             min-height: 120px;
             background: white;
+            overflow: hidden;
+        }
+
+        .attendance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
         }
 
         .attendance-card:hover:not(.processing):not(.disabled) {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .attendance-card:hover:not(.processing):not(.disabled)::before {
+            transform: translateX(100%);
+        }
+
+        .attendance-card:active:not(.processing):not(.disabled) {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .attendance-card:focus:not(.processing):not(.disabled) {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
         }
 
         .attendance-card i {
@@ -224,11 +342,35 @@
             border: none;
             padding: 0.5rem 1.5rem;
             font-weight: 600;
-            transition: background 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
         }
 
         .logout-btn:hover {
             background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
         }
 
         footer {
@@ -331,6 +473,73 @@
 
         .history-table th {
             background-color: #f2f2f2;
+        }
+
+        /* Skeleton Loading Styles */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        .skeleton-row {
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .skeleton-cell {
+            height: 100%;
+            margin: 0 5px;
+        }
+
+        .skeleton-cell.date {
+            width: 120px;
+        }
+
+        .skeleton-cell.time {
+            width: 100px;
+        }
+
+        .skeleton-cell.status {
+            width: 80px;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .custom-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -562,7 +771,7 @@
                                                 aria-label="Select end date" style="border: 1px solid #dee2e6;">
                                         </div>
                                     </div>
-                                    <div class="col-12 d-flex align-items-end justify-content-center ">
+                                    <div class="col-12 d-flex align-items-end justify-content-center flex-wrap gap-2">
                                         <button type="button" class="btn btn-primary me-2" onclick="applyDateFilter()"
                                             aria-label="Apply date filter"
                                             style="background-color: #0d6efd; border-color: #0d6efd; border-radius: 8px; padding: 0.5rem 1.2rem;">
@@ -573,6 +782,11 @@
                                             style="border-radius: 8px; padding: 0.5rem 1.2rem;">
                                             <i class="fa-solid fa-trash me-1"></i>Clear
                                         </button>
+                                        <button type="button" class="btn btn-success" onclick="exportToCSV()"
+                                            aria-label="Export attendance history to CSV"
+                                            style="border-radius: 8px; padding: 0.5rem 1.2rem;">
+                                            <i class="fa-solid fa-download me-1"></i>Export CSV
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -580,7 +794,7 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
+                <div id="tableView" class="table-responsive">
                     <table class="table table-hover table-bordered border-primary-subtle rounded history-table">
                         <thead>
                             <tr>
@@ -594,6 +808,13 @@
                             <!-- History will be populated here -->
                         </tbody>
                     </table>
+                    <!-- Skeleton Loading Container -->
+                    <div id="skeletonLoader" class="loading-container" style="display: none;">
+                        <div class="spinner-container">
+                            <div class="custom-spinner"></div>
+                            <p class="text-muted">Loading attendance history...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -912,12 +1133,26 @@
                 return;
             }
 
-            // Show loading indicator
+            // Show skeleton loader
             const historyBody = document.getElementById("attendanceHistoryBody");
-            historyBody.innerHTML = '<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading attendance history...</td></tr>';
+            const skeletonLoader = document.getElementById("skeletonLoader");
+            const tableContainer = historyBody.closest('.table-responsive');
+            
+            // Hide table and show skeleton loader
+            tableContainer.querySelector('.history-table').style.display = 'none';
+            skeletonLoader.style.display = 'flex';
+            
+            // Clear previous content
+            historyBody.innerHTML = '';
 
             google.script.run.withSuccessHandler(response => {
                 console.log("Response from getAttendanceHistory:", response);
+                
+                // Hide skeleton loader and show table
+                const skeletonLoader = document.getElementById("skeletonLoader");
+                const tableContainer = historyBody.closest('.table-responsive');
+                tableContainer.querySelector('.history-table').style.display = 'table';
+                skeletonLoader.style.display = 'none';
 
                 if (response && response.success) {
                     historyBody.innerHTML = ""; // Clear loading indicator
@@ -968,6 +1203,13 @@
                 }
             }).withFailureHandler(error => {
                 console.error("Error calling getAttendanceHistory:", error);
+                
+                // Hide skeleton loader and show table
+                const skeletonLoader = document.getElementById("skeletonLoader");
+                const tableContainer = historyBody.closest('.table-responsive');
+                tableContainer.querySelector('.history-table').style.display = 'table';
+                skeletonLoader.style.display = 'none';
+                
                 historyBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading history.</td></tr>';
                 showAlert(error.message || "Network error. Failed to load attendance history.", "danger");
             }).getAttendanceHistory(String(mgtId).trim(), startDate, endDate);
@@ -1008,6 +1250,80 @@
 
             console.log("Clearing date filter");
             loadAttendanceHistory(currentUser.userId);
+        }
+
+        function exportToCSV() {
+            if (!currentUser) {
+                showAlert("Please log in first.", "danger");
+                return;
+            }
+
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("endDate").value;
+            
+            // Show loading state
+            showAlert("Preparing export data...", "info");
+
+            google.script.run.withSuccessHandler(response => {
+                if (response && response.success) {
+                    const csvContent = generateCSV(response.history, startDate, endDate);
+                    downloadCSV(csvContent, `attendance_history_${currentUser.userId}_${new Date().toISOString().split('T')[0]}.csv`);
+                    showAlert("Attendance history exported successfully!", "success");
+                } else {
+                    showAlert("Failed to export attendance history.", "danger");
+                }
+            }).withFailureHandler(error => {
+                showAlert("Error exporting data: " + error.message, "danger");
+            }).getAttendanceHistory(currentUser.userId, startDate, endDate);
+        }
+
+        function generateCSV(history, startDate, endDate) {
+            if (!history || history.length === 0) {
+                return "No data available for export.";
+            }
+
+            // CSV Headers
+            let csv = "Date,Check-In,Check-Out,Status\n";
+            
+            // CSV Data
+            history.forEach(record => {
+                const date = record.date || "";
+                const checkIn = record.checkIn || "";
+                const checkOut = record.checkOut || "";
+                const status = record.status || "";
+                
+                // Escape commas and quotes in data
+                const escapeField = (field) => {
+                    if (typeof field === 'string' && (field.includes(',') || field.includes('"'))) {
+                        return `"${field.replace(/"/g, '""')}"`;
+                    }
+                    return field;
+                };
+                
+                csv += `${escapeField(date)},${escapeField(checkIn)},${escapeField(checkOut)},${escapeField(status)}\n`;
+            });
+
+            return csv;
+        }
+
+        function downloadCSV(csvContent, filename) {
+            // Create a Blob with the CSV content
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // Create a download link
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
         }
 
         function logout() {
@@ -1092,6 +1408,7 @@
                 });
             });
         };
+
 
         document.addEventListener("mousemove", resetSessionTimeout);
         document.addEventListener("keypress", resetSessionTimeout);

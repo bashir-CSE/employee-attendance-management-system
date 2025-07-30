@@ -106,15 +106,23 @@ const SHEET_NAMES = {
 ```
 
 ### Geofence Settings
-Adjust the office location and radius:
+**IMPORTANT**: Update these coordinates to match your actual office location:
 
 ```javascript
-const OFFICE_LOCATION = { 
-  latitude: 23.741383599749824,   // Your office latitude
-  longitude: 90.37679524500614    // Your office longitude
-}; 
-const GEOFENCE_RADIUS = 1800; // Radius in meters
+const OFFICE_LOCATION = {
+  latitude: 23.741383599749824,   // Your office latitude - UPDATE THIS
+  longitude: 90.37679524500614    // Your office longitude - UPDATE THIS
+};
+const GEOFENCE_RADIUS = 5000; // Radius in meters (increased for better coverage)
+const DEBUG_LOCATION = true;   // Set to false in production
 ```
+
+**How to get accurate coordinates:**
+1. Go to Google Maps and find your office location
+2. Right-click on the exact office location
+3. Click on the coordinates that appear (e.g., '23.7414, 90.3768')
+4. Copy these coordinates and update `OFFICE_LOCATION` in Code.gs
+5. Run `getLocationSetupInfo()` function in Apps Script for detailed setup help
 
 ### Date/Time Formats
 Customize date and time display formats:
@@ -182,6 +190,16 @@ const TIME_FORMAT = "hh:mm a";     // Display format (12-hour with AM/PM)
    - Verify user exists in Users sheet
    - Check password is exactly 4 digits
    - Clear browser cache and try again
+
+5. **Geofence/Location issues** ("You are XXXXm away" error):
+   - **Most Common Fix**: Update office coordinates in `OFFICE_LOCATION`
+   - Get accurate coordinates from Google Maps (right-click → copy coordinates)
+   - Increase `GEOFENCE_RADIUS` (try 3000, 5000, or higher)
+   - Set `GEOFENCE_RADIUS = 0` to temporarily disable location validation
+   - Enable `DEBUG_LOCATION = true` for detailed location information
+   - Check Apps Script logs for exact coordinates being used
+   - Ensure location services are enabled in browser
+   - Try from different devices to verify the issue
 
 ### System Validation
 

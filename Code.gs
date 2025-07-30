@@ -36,11 +36,19 @@ const SHEET_NAMES = {
 };
 
 // Office Location and Geofence Settings
+// IMPORTANT: Update these coordinates to match your actual office location
+// You can get accurate coordinates from Google Maps by right-clicking on your office location
 const OFFICE_LOCATION = {
-  latitude: 23.741383599749824,   // Office latitude
-  longitude: 90.37679524500614    // Office longitude
+  latitude: 23.741383599749824,   // Office latitude - UPDATE THIS
+  longitude: 90.37679524500614    // Office longitude - UPDATE THIS
 };
-const GEOFENCE_RADIUS = 1800; // Radius in meters for attendance location validation
+
+// Geofence radius in meters - increased for better coverage
+// Set to 0 to disable geofence validation (for testing only)
+const GEOFENCE_RADIUS = 5000; // Increased from 1800m to 5000m for better coverage
+
+// Debug mode - set to true to get detailed location information
+const DEBUG_LOCATION = true; // Set to false in production
 
 // Date and Time Formats
 const DATE_FORMAT = "yyyy-MM-dd";  // Date format for storage
@@ -149,6 +157,39 @@ function validateSystemConfiguration() {
  */
 function initializeSystem() {
   return validateSystemConfiguration();
+}
+
+/**
+ * Helper function to get location coordinates for setup
+ * Call this function manually to get coordinates for your office location
+ */
+function getLocationSetupInfo() {
+  const info = {
+    currentOfficeLocation: OFFICE_LOCATION,
+    currentGeofenceRadius: GEOFENCE_RADIUS,
+    debugMode: DEBUG_LOCATION,
+    instructions: [
+      "1. Go to Google Maps and find your office location",
+      "2. Right-click on the exact office location",
+      "3. Click on the coordinates that appear (e.g., '23.7414, 90.3768')",
+      "4. Copy these coordinates and update OFFICE_LOCATION in Code.gs",
+      "5. Test with a small radius first (e.g., 100m) then increase as needed",
+      "6. Set DEBUG_LOCATION to false in production"
+    ],
+    troubleshooting: [
+      "If users are still outside geofence:",
+      "- Verify coordinates are correct (latitude, longitude order)",
+      "- Increase GEOFENCE_RADIUS gradually (try 2000, 3000, 5000)",
+      "- Set GEOFENCE_RADIUS to 0 to temporarily disable validation",
+      "- Check Google Apps Script logs for detailed location info"
+    ]
+  };
+  
+  Logger.log("=== LOCATION SETUP INFO ===");
+  Logger.log(JSON.stringify(info, null, 2));
+  Logger.log("=== END SETUP INFO ===");
+  
+  return info;
 }
 
 
@@ -279,12 +320,29 @@ function recordAttendance(mgtId, type, userLat, userLon) {
         const time = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), TIME_FORMAT);
 
         // Geofence check for check-in and check-out
-        if (type !== "absent") {
+        if (type !== "absent" && GEOFENCE_RADIUS > 0) {
             const distance = calculateDistance(userLat, userLon, OFFICE_LOCATION.latitude, OFFICE_LOCATION.longitude);
-            Logger.log(`User at (${userLat}, ${userLon}), Office at (${OFFICE_LOCATION.latitude}, ${OFFICE_LOCATION.longitude}), Distance: ${distance}m`);
+            
+            // Enhanced logging for debugging
+            Logger.log(`=== GEOFENCE DEBUG INFO ===`);
+            Logger.log(`User Location: (${userLat}, ${userLon})`);
+            Logger.log(`Office Location: (${OFFICE_LOCATION.latitude}, ${OFFICE_LOCATION.longitude})`);
+            Logger.log(`Calculated Distance: ${distance}m`);
+            Logger.log(`Geofence Radius: ${GEOFENCE_RADIUS}m`);
+            Logger.log(`Within Geofence: ${distance <= GEOFENCE_RADIUS}`);
+            Logger.log(`=== END DEBUG INFO ===`);
+            
             if (distance > GEOFENCE_RADIUS) {
-                return { success: false, message: `You are ${Math.round(distance)}m away from the office. Must be within ${GEOFENCE_RADIUS}m.` };
+                let errorMessage = `You are ${Math.round(distance)}m away from the office. Must be within ${GEOFENCE_RADIUS}m.`;
+                
+                if (DEBUG_LOCATION) {
+                    errorMessage += `\n\nDEBUG INFO:\nYour location: ${userLat}, ${userLon}\nOffice location: ${OFFICE_LOCATION.latitude}, ${OFFICE_LOCATION.longitude}\n\nTo fix this:\n1. Verify office coordinates in Code.gs\n2. Get accurate coordinates from Google Maps\n3. Or increase GEOFENCE_RADIUS if needed`;
+                }
+                
+                return { success: false, message: errorMessage };
             }
+        } else if (GEOFENCE_RADIUS === 0) {
+            Logger.log("⚠️ GEOFENCE DISABLED - Location validation bypassed");
         }
 
         const data = sheet.getDataRange().getValues();
