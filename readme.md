@@ -11,6 +11,10 @@ A comprehensive web-based employee attendance management system built with Googl
 - **Attendance History**: Complete historical records with status tracking
 - **Password Reset**: Self-service password reset functionality
 - **Auto-complete**: Smart MGT-ID suggestions during login/registration
+- **Automatic Attendance Status**:
+  - **Present**: Checked in between 10:00 AM and 10:15 AM
+  - **Late**: Checked in after 10:15 AM but before 6:00 PM
+  - **Absent**: Did not check in at all (or manually marked as absent)
 
 ### Technical Features
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
@@ -246,6 +250,7 @@ Run the `initializeSystem()` function in Apps Script to check:
 - **Loading Indicators**: Visual feedback during data loading
 - **Status Badges**: Color-coded status indicators in history table
 - **System Validation**: Built-in configuration validation function
+- **Automatic Status**: Automatically sets status to "Present" or "Late" based on check-in time.
 
 ## 📞 Support
 

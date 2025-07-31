@@ -50,6 +50,13 @@ const GEOFENCE_RADIUS = 5000; // Increased from 1800m to 5000m for better covera
 // Debug mode - set to true to get detailed location information
 const DEBUG_LOCATION = true; // Set to false in production
 
+// Attendance Status Rules
+const ATTENDANCE_RULES = {
+  PRESENT_START_TIME: "10:00 AM",
+  PRESENT_END_TIME: "10:15 AM",
+  LATE_END_TIME: "6:00 PM"
+};
+
 // Date and Time Formats
 const DATE_FORMAT = "yyyy-MM-dd";  // Date format for storage
 const TIME_FORMAT = "hh:mm a";     // Time format for display (AM/PM format)
@@ -277,6 +284,9 @@ function getTodaysAttendanceStatus(mgtId) {
                 if (status === "Absent") {
                     return "absent";
                 }
+                if (status === "Late") {
+                    return "late";
+                }
                 if (checkOut && checkOut !== "-") {
                     return "checked-out";
                 }
@@ -379,11 +389,36 @@ function recordAttendance(mgtId, type, userLat, userLon) {
                     return { success: false, message: "Already checked in today at " + checkIn };
                 }
                 Logger.log(`Updating check-in at row ${targetRow}`);
+                const now = new Date();
+                const checkInTime = new Date(now.toDateString() + " " + time);
+                const presentStartTime = new Date(now.toDateString() + " " + ATTENDANCE_RULES.PRESENT_START_TIME);
+                const presentEndTime = new Date(now.toDateString() + " " + ATTENDANCE_RULES.PRESENT_END_TIME);
+                const lateEndTime = new Date(now.toDateString() + " " + ATTENDANCE_RULES.LATE_END_TIME);
+
+                let status = "Absent";
+                if (checkInTime >= presentStartTime && checkInTime <= presentEndTime) {
+                    status = "Present";
+                } else if (checkInTime > presentEndTime && checkInTime <= lateEndTime) {
+                    status = "Late";
+                }
+
                 sheet.getRange(targetRow, 3).setValue(time);
-                sheet.getRange(targetRow, 5).setValue("Present");
+                sheet.getRange(targetRow, 5).setValue(status);
             } else {
                 Logger.log(`Appending new row for check-in`);
-                sheet.appendRow([mgtId, today, time, "", "Present", new Date()]);
+                const now = new Date();
+                const checkInTime = new Date(now.toDateString() + " " + time);
+                const presentStartTime = new Date(now.toDateString() + " " + ATTENDANCE_RULES.PRESENT_START_TIME);
+                const presentEndTime = new Date(now.toDateString() + " " + ATTENDANCE_RULES.PRESENT_END_TIME);
+                const lateEndTime = new Date(now.toDateString() + " " + ATTENDANCE_RULES.LATE_END_TIME);
+
+                let status = "Absent";
+                if (checkInTime >= presentStartTime && checkInTime <= presentEndTime) {
+                    status = "Present";
+                } else if (checkInTime > presentEndTime && checkInTime <= lateEndTime) {
+                    status = "Late";
+                }
+                sheet.appendRow([mgtId, today, time, "", status, new Date()]);
             }
             return { success: true, message: "Check-in recorded at " + time };
         } else if (type === "check-out") {
