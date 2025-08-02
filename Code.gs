@@ -206,6 +206,14 @@ function doGet() {
         .setTitle("Employee Attendance System");
 }
 
+/**
+ * Registers a new user in the system.
+ * @param {string} mgtId - The user's MGT-ID.
+ * @param {string} name - The user's full name.
+ * @param {string} email - The user's email address.
+ * @param {string} password - The user's 4-digit numeric password.
+ * @returns {{success: boolean, message: string}}
+ */
 function registerUser(mgtId, name, email, password) {
     try {
         const sheet = getSheet(SHEET_NAMES.USERS);
@@ -238,6 +246,10 @@ function registerUser(mgtId, name, email, password) {
     }
 }
 
+/**
+ * Retrieves a list of all employees for autocomplete functionality.
+ * @returns {Array<{mgtId: string, name: string}>|{success: false, message: string}}
+ */
 function getEmployeeData() {
     try {
         const sheet = getSheet(SHEET_NAMES.EMPLOYEE_DATA);
@@ -256,6 +268,11 @@ function getEmployeeData() {
     }
 }
 
+/**
+ * Gets the user's attendance status for the current day.
+ * @param {string} mgtId - The user's MGT-ID.
+ * @returns {string} The status: "checked-in", "late", "checked-out", "absent", "none", or "error".
+ */
 function getTodaysAttendanceStatus(mgtId) {
     try {
         const sheet = getSheet(SHEET_NAMES.ATTENDANCE);
@@ -302,6 +319,12 @@ function getTodaysAttendanceStatus(mgtId) {
     }
 }
 
+/**
+ * Logs in a user.
+ * @param {string} mgtId - The user's MGT-ID.
+ * @param {string} password - The user's 4-digit numeric password.
+ * @returns {{success: boolean, userId: string|undefined, name: string|undefined, message: string|undefined}}
+ */
 function loginUser(mgtId, password) {
     try {
         const sheet = getSheet(SHEET_NAMES.USERS);
@@ -322,6 +345,15 @@ function loginUser(mgtId, password) {
     }
 }
 
+/**
+ * Records user attendance (check-in, check-out, or absent).
+ * Validates user's location against office geofence for check-in/out.
+ * @param {string} mgtId - The user's MGT-ID.
+ * @param {string} type - The type of attendance ('check-in', 'check-out', 'absent').
+ * @param {number} userLat - The user's latitude.
+ * @param {number} userLon - The user's longitude.
+ * @returns {{success: boolean, message: string}}
+ */
 function recordAttendance(mgtId, type, userLat, userLon) {
     try {
         const sheet = getSheet(SHEET_NAMES.ATTENDANCE);
@@ -471,6 +503,12 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+/**
+ * Resets a user's password.
+ * @param {string} mgtId - The user's MGT-ID.
+ * @param {string} newPassword - The new 4-digit numeric password.
+ * @returns {{success: boolean, message: string}}
+ */
 function resetPassword(mgtId, newPassword) {
     try {
         if (!/^\d{4}$/.test(newPassword)) {
@@ -493,29 +531,34 @@ function resetPassword(mgtId, newPassword) {
     }
 }
 
-function getAttendanceHistory(mgtId, startDate = null, endDate = null) {
+/**
+ * Retrieves paginated attendance history for a given user, with optional date filtering.
+ * @param {string} mgtId - The user's MGT-ID.
+ * @param {string|null} startDate - The start date for filtering (YYYY-MM-DD).
+ * @param {string|null} endDate - The end date for filtering (YYYY-MM-DD).
+ * @param {number} page - The page number for pagination (1-based).
+ * @param {number} pageSize - The number of records per page.
+ * @returns {{success: boolean, history: Array<Object>, hasMore: boolean, message: string|undefined}}
+ */
+function getAttendanceHistory(mgtId, startDate = null, endDate = null, page = 1, pageSize = 10) {
     try {
-        Logger.log("getAttendanceHistory started for MGT-ID: " + mgtId);
+        Logger.log(`getAttendanceHistory called for MGT-ID: ${mgtId}, Page: ${page}, PageSize: ${pageSize}`);
         if (startDate && endDate) {
-            Logger.log("Date range filter: " + startDate + " to " + endDate);
+            Logger.log(`Date range filter: ${startDate} to ${endDate}`);
         }
-        
-        // Validate input
+
         if (!mgtId || String(mgtId).trim() === "") {
             Logger.log("MGT-ID is null, undefined, or empty. Aborting.");
             return { success: false, message: "MGT-ID was not provided to the server." };
         }
 
-        // Parse date range if provided
         let filterStartDate = null;
         let filterEndDate = null;
         if (startDate && endDate) {
             try {
                 filterStartDate = new Date(startDate);
                 filterEndDate = new Date(endDate);
-                // Set end date to end of day for inclusive filtering
                 filterEndDate.setHours(23, 59, 59, 999);
-                Logger.log("Parsed date range: " + filterStartDate + " to " + filterEndDate);
             } catch (e) {
                 Logger.log("Error parsing date range: " + e.message);
                 return { success: false, message: "Invalid date range provided." };
@@ -523,43 +566,44 @@ function getAttendanceHistory(mgtId, startDate = null, endDate = null) {
         }
 
         const sheet = getSheet(SHEET_NAMES.ATTENDANCE);
-        const history = [];
-        const normalizedMgtId = String(mgtId).trim().toUpperCase();
-
         const data = sheet.getDataRange().getValues();
-        const mgtIdCol = 0; 
-        const dateCol = 1;
-        const checkInCol = 2;
-        const checkOutCol = 3;
-        const statusCol = 4;
-
+        const normalizedMgtId = String(mgtId).trim().toUpperCase();
+        
+        const allRecords = [];
+        // Loop from newest to oldest
         for (let i = data.length - 1; i >= 1; i--) {
-            if (String(data[i][mgtIdCol]).trim().toUpperCase() === normalizedMgtId) {
+            if (String(data[i][0]).trim().toUpperCase() === normalizedMgtId) {
                 let recordDate = null;
                 try {
-                    recordDate = new Date(data[i][dateCol]);
+                    recordDate = new Date(data[i][1]);
                 } catch (e) {
-                    continue;
+                    continue; // Skip invalid date records
                 }
 
+                // Apply date filter if present
                 if (filterStartDate && filterEndDate) {
                     if (recordDate < filterStartDate || recordDate > filterEndDate) {
                         continue;
                     }
                 }
-
-                history.push({
+                
+                allRecords.push({
                     date: Utilities.formatDate(recordDate, Session.getScriptTimeZone(), "dd-MM-yyyy"),
-                    checkIn: data[i][checkInCol] ? Utilities.formatDate(new Date(data[i][checkInCol]), Session.getScriptTimeZone(), TIME_FORMAT) : "-",
-                    checkOut: data[i][checkOutCol] ? Utilities.formatDate(new Date(data[i][checkOutCol]), Session.getScriptTimeZone(), TIME_FORMAT) : "-",
-                    status: data[i][statusCol] || "-"
+                    checkIn: data[i][2] ? Utilities.formatDate(new Date(data[i][2]), Session.getScriptTimeZone(), TIME_FORMAT) : "-",
+                    checkOut: data[i][3] ? Utilities.formatDate(new Date(data[i][3]), Session.getScriptTimeZone(), TIME_FORMAT) : "-",
+                    status: data[i][4] || "-"
                 });
             }
         }
-        
-        Logger.log("Found " + history.length + " records for MGT-ID: " + normalizedMgtId);
-        return { success: true, history: history };
-        
+
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedHistory = allRecords.slice(startIndex, endIndex);
+        const hasMore = endIndex < allRecords.length;
+
+        Logger.log(`Found ${allRecords.length} total records. Sending page ${page} with ${paginatedHistory.length} records. HasMore: ${hasMore}`);
+        return { success: true, history: paginatedHistory, hasMore: hasMore };
+
     } catch (error) {
         return handleError(error, "getAttendanceHistory");
     }

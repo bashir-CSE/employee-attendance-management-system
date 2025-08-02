@@ -37,7 +37,12 @@
             background-color: #007bff;
             border: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 0.75rem 1.5rem;
+            padding: var(--button-padding, 0.75rem 1.5rem);
+            min-height: var(--touch-target-size, 48px);
+            min-width: var(--touch-target-size, 48px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
             overflow: hidden;
             transform: translateY(0);
@@ -139,12 +144,17 @@
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: var(--button-padding, 0.5rem 1rem);
+            min-height: var(--touch-target-size, 48px);
+            min-width: var(--touch-target-size, 48px);
             margin: 0 0.25rem;
             border-radius: 5px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .navbar-nav .nav-link.btn::before {
@@ -819,8 +829,11 @@
                     <div id="skeletonLoader" class="loading-container" style="display: none;">
                         <div class="spinner-container">
                             <div class="custom-spinner"></div>
-                            <p class="text-muted">Loading attendance history...</p>
+                            <p class="text-muted" id="loadingMessage">Loading attendance history...</p>
                         </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button id="loadMoreBtn" class="btn btn-primary" style="display: none;">Load More</button>
                     </div>
                 </div>
             </div>
@@ -850,6 +863,50 @@
     <datalist id="mgtIdList"></datalist>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ========================================
+        // CONFIGURATION OBJECT
+        // Centralized configuration for UI settings
+        // ========================================
+        const UI_CONFIG = {
+            // Session timeout in milliseconds (5 minutes)
+            SESSION_TIMEOUT: 300000,
+            
+            // Alert display duration in milliseconds (4 seconds)
+            ALERT_DURATION: 4000,
+            
+            // Geolocation settings
+            GEOLOCATION: {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            },
+            
+            // Animation settings
+            ANIMATIONS: {
+                pageTransition: 'animate__animated animate__fadeIn',
+                alertShow: 'animate__animated animate__fadeInDown',
+                alertHide: 'animate__fadeOutUp'
+            },
+            
+            // Loading messages
+            LOADING_MESSAGES: {
+                login: 'Logging in...',
+                registration: 'Registering...',
+                passwordReset: 'Resetting password...',
+                attendance: 'Recording attendance...',
+                history: 'Loading attendance history...',
+                export: 'Preparing export data...'
+            },
+            
+            // Touch target minimum sizes (in pixels)
+            TOUCH_TARGETS: {
+                minimumSize: '48px', // Minimum touch target size as per accessibility guidelines
+                buttonPadding: '0.75rem 1.5rem' // Minimum padding for buttons
+            }
+        };
+
+        document.documentElement.style.setProperty('--touch-target-size', UI_CONFIG.TOUCH_TARGETS.minimumSize);
+        document.documentElement.style.setProperty('--button-padding', UI_CONFIG.TOUCH_TARGETS.buttonPadding);
 
 
         let currentUser = null;
@@ -872,9 +929,14 @@
             icon.classList.toggle("fa-eye-slash", !isVisible);
         }
 
+        /**
+         * Show an alert message to the user
+         * @param {string} message - The message to display
+         * @param {string} type - The type of alert (success, danger, warning, info)
+         */
         function showAlert(message, type) {
             const alert = document.createElement("div");
-            alert.className = `alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInDown`;
+            alert.className = `alert alert-${type} alert-dismissible fade show ${UI_CONFIG.ANIMATIONS.alertShow}`;
             alert.role = "alert";
             alert.innerHTML = `
                 <i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-triangle"} me-2"></i>
@@ -883,24 +945,33 @@
             `;
             document.getElementById("alertContainer").appendChild(alert);
             setTimeout(() => {
-                alert.classList.remove("animate__fadeInDown");
-                alert.classList.add("animate__fadeOutUp");
+                alert.classList.remove(UI_CONFIG.ANIMATIONS.alertShow);
+                alert.classList.add(UI_CONFIG.ANIMATIONS.alertHide);
                 setTimeout(() => alert.remove(), 500);
-            }, 4000);
+            }, UI_CONFIG.ALERT_DURATION);
         }
 
-        function toggleSpinner(button, show) {
+        function toggleSpinner(button, show, message = '') {
             const spinner = button.querySelector(".spinner-border");
             const content = button.querySelector(".btn-content");
             if (show) {
                 spinner.classList.remove("d-none");
+                content.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${message}`;
                 content.classList.add("d-none");
             } else {
                 spinner.classList.add("d-none");
                 content.classList.remove("d-none");
+                // Restore original button text
+                if (button.dataset.originalText) {
+                    content.innerHTML = button.dataset.originalText;
+                }
             }
         }
 
+        /**
+         * Reset the session timeout timer
+         * Uses UI_CONFIG.SESSION_TIMEOUT for the timeout duration
+         */
         function resetSessionTimeout() {
             clearTimeout(sessionTimeout);
             sessionTimeout = setTimeout(() => {
@@ -908,7 +979,7 @@
                     logout();
                     showAlert("Session expired due to inactivity.", "warning");
                 }
-            }, 300000);
+            }, UI_CONFIG.SESSION_TIMEOUT);
         }
 
         function validateInput(inputId, validationId) {
@@ -958,7 +1029,7 @@
                 return;
             }
 
-            toggleSpinner(button, true);
+            toggleSpinner(button, true, UI_CONFIG.LOADING_MESSAGES.registration);
             google.script.run.withSuccessHandler(response => {
                 toggleSpinner(button, false);
                 if (response.success) {
@@ -992,14 +1063,12 @@
                 return;
             }
 
-            toggleSpinner(button, true);
+            toggleSpinner(button, true, UI_CONFIG.LOADING_MESSAGES.login);
             google.script.run.withSuccessHandler(response => {
                 toggleSpinner(button, false);
                 if (response.success) {
                     currentUser = response;
                     sessionStorage.setItem("currentUser", JSON.stringify(response));
-                    console.log("handleLogin: currentUser set to:", currentUser); // Added log
-                    console.log("handleLogin: sessionStorage after set:", sessionStorage.getItem("currentUser")); // Added log
                     document.getElementById("userName").textContent = response.name;
                     document.getElementById("userId").textContent = response.userId;
                     showAlert("Logged in successfully!", "success");
@@ -1032,7 +1101,7 @@
                 return;
             }
 
-            toggleSpinner(button, true);
+            toggleSpinner(button, true, UI_CONFIG.LOADING_MESSAGES.passwordReset);
             google.script.run.withSuccessHandler(response => {
                 toggleSpinner(button, false);
                 showAlert(response.message, response.success ? "success" : "danger");
@@ -1061,7 +1130,11 @@
             }
 
             card.classList.add("processing");
+            const processingText = card.querySelector('.processing-text');
+            processingText.textContent = UI_CONFIG.LOADING_MESSAGES.attendance;
 
+
+            // Get user's current location with improved error handling
             navigator.geolocation.getCurrentPosition(
                 position => {
                     const lat = position.coords.latitude;
@@ -1081,14 +1154,32 @@
                         }
                     }).withFailureHandler(error => {
                         card.classList.remove("processing");
-                        showAlert(error.message || "Server error. Please try again.", "danger");
+                        // More descriptive error messages with possible solutions
+                        let errorMessage = "Server error. Please try again.";
+                        if (error.message) {
+                            errorMessage = error.message;
+                        } else if (error.code === "timeout") {
+                            errorMessage = "Request timed out. Please check your internet connection and try again.";
+                        } else if (error.code === "server_error") {
+                            errorMessage = "Server error. Please try again in a few minutes.";
+                        }
+                        showAlert(errorMessage, "danger");
                     }).recordAttendance(currentUser.userId, type, lat, lon);
                 },
                 error => {
                     card.classList.remove("processing");
-                    showAlert("Location access denied. Enable it and try again.", "danger");
+                    // More descriptive error messages with possible solutions
+                    let errorMessage = "Location access denied. Enable it and try again.";
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMessage = "Location access denied. Please enable location permissions in your browser settings and try again.";
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        errorMessage = "Location information is unavailable. Please check your device settings and try again.";
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMessage = "Location request timed out. Please check your internet connection and try again.";
+                    }
+                    showAlert(errorMessage, "danger");
                 },
-                { enableHighAccuracy: true, timeout: 10000 }
+                UI_CONFIG.GEOLOCATION
             );
             resetSessionTimeout();
         }
@@ -1133,101 +1224,79 @@
             }).getTodaysAttendanceStatus(mgtId);
         }
 
-        function loadAttendanceHistory(mgtId, startDate = null, endDate = null) {
-            console.log("Loading attendance history for MGT-ID:", mgtId);
-            if (startDate && endDate) {
-                console.log("Date range filter:", startDate, "to", endDate);
+        let currentPage = 1;
+        const pageSize = 15;
+        let isLoading = false;
+
+        function loadAttendanceHistory(mgtId, startDate = null, endDate = null, loadMore = false) {
+            if (isLoading) return;
+            isLoading = true;
+
+            if (!loadMore) {
+                currentPage = 1;
+                document.getElementById("attendanceHistoryBody").innerHTML = '';
             }
 
-            // Validate MGT-ID before making the call
-            if (!mgtId || String(mgtId).trim() === "") {
-                console.error("Invalid MGT-ID provided to loadAttendanceHistory:", mgtId);
-                showAlert("Invalid user ID. Please log in again.", "danger");
-                return;
-            }
-
-            // Show skeleton loader
-            const historyBody = document.getElementById("attendanceHistoryBody");
+            console.log(`Loading page ${currentPage} for MGT-ID: ${mgtId}`);
+            
             const skeletonLoader = document.getElementById("skeletonLoader");
-            const tableContainer = historyBody.closest('.table-responsive');
-            
-            // Hide table and show skeleton loader
-            tableContainer.querySelector('.history-table').style.display = 'none';
+            const loadMoreBtn = document.getElementById("loadMoreBtn");
             skeletonLoader.style.display = 'flex';
-            
-            // Clear previous content
-            historyBody.innerHTML = '';
+            loadMoreBtn.style.display = 'none';
 
-            google.script.run.withSuccessHandler(response => {
-                console.log("Response from getAttendanceHistory:", response);
-                
-                // Hide skeleton loader and show table
-                const skeletonLoader = document.getElementById("skeletonLoader");
-                const tableContainer = historyBody.closest('.table-responsive');
-                tableContainer.querySelector('.history-table').style.display = 'table';
-                skeletonLoader.style.display = 'none';
+            google.script.run
+                .withSuccessHandler(response => {
+                    skeletonLoader.style.display = 'none';
+                    isLoading = false;
 
-                if (response && response.success) {
-                    historyBody.innerHTML = ""; // Clear loading indicator
+                    if (response && response.success) {
+                        const historyBody = document.getElementById("attendanceHistoryBody");
+                        
+                        if (response.history && response.history.length > 0) {
+                            response.history.forEach(record => {
+                                const date = record.date || "-";
+                                const checkIn = record.checkIn || "-";
+                                const checkOut = record.checkOut || "-";
+                                const status = record.status || "-";
 
-                    if (response.history && response.history.length > 0) {
-                        console.log("History data received:", response.history.length, "records");
+                                let statusClass = "";
+                                if (status.toLowerCase() === "present") statusClass = "badge bg-success";
+                                else if (status.toLowerCase() === "absent") statusClass = "badge bg-danger";
+                                else if (status.toLowerCase() === "late") statusClass = "badge bg-warning text-dark";
+                                else statusClass = "badge bg-secondary";
 
-                        response.history.forEach((record, index) => {
-                            // Validate record data
-                            const date = record.date || "-";
-                            const checkIn = record.checkIn || "-";
-                            const checkOut = record.checkOut || "-";
-                            const status = record.status || "-";
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${date}</td>
+                                    <td>${checkIn}</td>
+                                    <td>${checkOut}</td>
+                                    <td><span class="${statusClass}">${status}</span></td>
+                                `;
+                                historyBody.appendChild(row);
+                            });
 
-                            // Add status badge styling
-                            let statusClass = "";
-                            let statusText = status;
-                            if (status.toLowerCase() === "present") {
-                                statusClass = "badge bg-success";
-                            } else if (status.toLowerCase() === "absent") {
-                                statusClass = "badge bg-danger";
-                            } else if (status.toLowerCase() === "late") {
-                                statusClass = "badge bg-warning text-dark";
+                            if (response.hasMore) {
+                                loadMoreBtn.style.display = 'block';
+                                currentPage++;
                             } else {
-                                statusClass = "badge bg-secondary";
+                                loadMoreBtn.style.display = 'none';
                             }
-
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${date}</td>
-                                <td>${checkIn}</td>
-                                <td>${checkOut}</td>
-                                <td><span class="${statusClass}">${statusText}</span></td>
-                            `;
-                            historyBody.appendChild(row);
-                        });
-
-                        console.log("Successfully loaded", response.history.length, "attendance records");
+                        } else if (currentPage === 1) {
+                            const message = startDate && endDate ?
+                                'No attendance records found for the selected date range.' :
+                                'No attendance history found.';
+                            historyBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted"><i class="fas fa-info-circle"></i> ${message}</td></tr>`;
+                        }
                     } else {
-                        console.log("No history found for this user.");
-                        const message = startDate && endDate ?
-                            'No attendance records found for the selected date range.' :
-                            'No attendance history found.';
-                        historyBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted"><i class="fas fa-info-circle"></i> ${message}</td></tr>`;
+                        showAlert(response ? response.message : "Failed to load attendance history.", "danger");
                     }
-                } else {
-                    console.error("Failed to load history:", response ? response.message : "Unknown error");
-                    historyBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> Failed to load history.</td></tr>';
-                    showAlert(response ? response.message : "Failed to load attendance history.", "danger");
-                }
-            }).withFailureHandler(error => {
-                console.error("Error calling getAttendanceHistory:", error);
-                
-                // Hide skeleton loader and show table
-                const skeletonLoader = document.getElementById("skeletonLoader");
-                const tableContainer = historyBody.closest('.table-responsive');
-                tableContainer.querySelector('.history-table').style.display = 'table';
-                skeletonLoader.style.display = 'none';
-                
-                historyBody.innerHTML = '<tr><td colspan="4" class="text-center text-danger"><i class="fas fa-exclamation-triangle"></i> Error loading history.</td></tr>';
-                showAlert(error.message || "Network error. Failed to load attendance history.", "danger");
-            }).getAttendanceHistory(String(mgtId).trim(), startDate, endDate);
+                })
+                .withFailureHandler(error => {
+                    isLoading = false;
+                    skeletonLoader.style.display = 'none';
+                    showAlert(error.message || "Network error. Failed to load attendance history.", "danger");
+                })
+                .getAttendanceHistory(String(mgtId).trim(), startDate, endDate, currentPage, pageSize);
         }
 
         function applyDateFilter() {
@@ -1259,13 +1328,19 @@
                 return;
             }
 
-            // Clear the date inputs
             document.getElementById("startDate").value = "";
             document.getElementById("endDate").value = "";
 
-            console.log("Clearing date filter");
             loadAttendanceHistory(currentUser.userId);
         }
+
+        document.getElementById("loadMoreBtn").addEventListener("click", () => {
+            if (currentUser) {
+                const startDate = document.getElementById("startDate").value;
+                const endDate = document.getElementById("endDate").value;
+                loadAttendanceHistory(currentUser.userId, startDate, endDate, true);
+            }
+        });
 
         function exportToCSV() {
             if (!currentUser) {
@@ -1276,8 +1351,7 @@
             const startDate = document.getElementById("startDate").value;
             const endDate = document.getElementById("endDate").value;
             
-            // Show loading state
-            showAlert("Preparing export data...", "info");
+            showAlert(UI_CONFIG.LOADING_MESSAGES.export, "info");
 
             google.script.run.withSuccessHandler(response => {
                 if (response && response.success) {
@@ -1289,7 +1363,7 @@
                 }
             }).withFailureHandler(error => {
                 showAlert("Error exporting data: " + error.message, "danger");
-            }).getAttendanceHistory(currentUser.userId, startDate, endDate);
+            }).getAttendanceHistory(currentUser.userId, startDate, endDate, 1, 10000); // Export all
         }
 
         function generateCSV(history, startDate, endDate) {
